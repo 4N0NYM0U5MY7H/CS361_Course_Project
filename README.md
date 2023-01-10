@@ -1,1 +1,1 @@
-# osu-cs361-f23-assignment-1
+# assignment-1
