@@ -104,6 +104,21 @@ def prompt_date_completed():
     return date_completed
 
 
+def search_by_date():
+    """Search for a record by Author Name."""
+    date_completed = prompt_date_completed()
+    with closing(sqlite3.connect("book_log.db")) as connection:
+        with closing(connection.cursor()) as cursor:
+            query = cursor.execute("""SELECT * FROM books WHERE date = ?""", (date_completed,)).fetchall()
+            results = ""
+            if query:
+                for row in query:
+                    results += f"{row}\n"
+                return results
+            else:
+                return f"No results found with the Completion Date {date_completed}"
+
+
 def remove_record(query_results):
     """Removes a record from the database."""
     if "No results found" in query_results:
@@ -201,7 +216,7 @@ if __name__ == "__main__":
                 print("Returning to Main Menu...")
                 continue
             elif remove_record_menu_selection == list(remove_record_menu.get_options())[2]:
-                #remove_record(search_by_date())
+                remove_record(search_by_date())
                 print("Returning to Main Menu...")
                 continue
             elif remove_record_menu_selection == list(remove_record_menu.get_options())[3]:
