@@ -7,7 +7,7 @@ import sys
 import sqlite3
 import re
 from contextlib import closing
-from UserInterace import MainMenu, AddRecordMenu
+from UserInterace import MainMenu, AddRecordMenu, RemoveRecordMenu
 
 
 def initiate_database():
@@ -73,9 +73,29 @@ def prompt_date_completed():
     return date_completed
 
 
-def remove_record():
+def remove_record(query_results):
     """Removes a record from the database."""
-    print("handling remove record...")
+    print("Displaying records...")
+    print("Book ID | Title | Author Name | Date Completed")
+    print(query_results)
+    print("Enter a Book ID to delete.")
+    print("Input a number and press ENTER to select an option.")
+    while True:
+        try:
+            selection = int(input("Your input: "))
+        except ValueError:
+            continue
+        else:
+            break
+    with closing(sqlite3.connect("book_log.db")) as connection:
+        with closing(connection.cursor()) as cursor:
+            query = cursor.execute("SELECT * FROM books WHERE book_id = ?", (selection,))
+            if query.fetchone():
+                cursor.execute("DELETE FROM books WHERE book_id = ?", (selection,))
+                print(f"Book successfully deleted!\n{query}")
+                connection.commit()
+            else:
+                print(f"No records found with Book ID {selection}.")
 
 
 def browse_records():
@@ -84,28 +104,27 @@ def browse_records():
     print("Book ID | Title | Author Name | Date Completed")
     with closing(sqlite3.connect("book_log.db")) as connection:
         with closing(connection.cursor()) as cursor:
-            results = cursor.execute("SELECT * FROM books ORDER BY title DESC").fetchall()
-            for row in results:
-                print(row)
+            query = cursor.execute("SELECT * FROM books ORDER BY title DESC").fetchall()
+            results = ""
+            for row in query:
+                results += f"{row}\n"
+    return results
 
 
 def exit_program():
     """Exits the program."""
-    print("Exiting program...")
     return sys.exit()
 
 
 if __name__ == "__main__":
+    """Main driver program for the CS 361 Portfolio Project."""
 
     program_title = "CS 361 Book Log"
     program_subtitle = "Tracking your reading since 2023"
     initiate_database()
     main_menu = MainMenu()
     add_record_menu = AddRecordMenu()
-
-    #cursor.execute("CREATE TABLE IF NOT EXISTS books (title TEXT, author TEXT, date TEXT)")
-    #rows = cursor.execute("SELECT title, author, date FROM books").fetchall()
-    #print(rows)
+    remove_record_menu = RemoveRecordMenu()
 
     print(f"Welcome to the {program_title}!\n{program_subtitle}.")
     while True:
@@ -113,27 +132,56 @@ if __name__ == "__main__":
         print("Input a number and press ENTER to select an option.")
         while True:
             try:
-                selection = int(input("Your input: "))
+                main_menu_selection = int(input("Your input: "))
             except ValueError:
-                valid_options = ""
-                for valid_key in main_menu.get_options().keys():
-                    valid_options += f"{valid_key} "
-                print(f"Only INTEGER values {valid_options}accepted")
+                print(f"Only INTEGER values between 1 and 4 accepted")
                 continue
             else:
                 break
 
-        if selection == list(main_menu.get_options())[0]:
+        if main_menu_selection == list(main_menu.get_options())[0]:
             print(add_record_menu.display())
             add_record()
-            break
-        elif selection == list(main_menu.get_options())[1]:
-            remove_record()
-            break
-        elif selection == list(main_menu.get_options())[2]:
-            browse_records()
-            break
-        elif selection == list(main_menu.get_options())[3]:
+            print("Returning to Main Menu...")
+            continue
+
+        elif main_menu_selection == list(main_menu.get_options())[1]:
+            print(remove_record_menu.display())
+            print("Input a number and press ENTER to select an option.")
+            while True:
+                try:
+                    remove_record_menu_selection = int(input("Your input: "))
+                except ValueError:
+                    print(f"Only INTEGER values between 1 and 4 accepted")
+                    continue
+                else:
+                    break
+
+            if remove_record_menu_selection == list(remove_record_menu.get_options())[0]:
+                #remove_record(search_by_title())
+                print("Returning to Main Menu...")
+                continue
+            elif remove_record_menu_selection == list(remove_record_menu.get_options())[1]:
+                #remove_record(search_by_author())
+                print("Returning to Main Menu...")
+                continue
+            elif remove_record_menu_selection == list(remove_record_menu.get_options())[2]:
+                #remove_record(search_by_date())
+                print("Returning to Main Menu...")
+                continue
+            elif remove_record_menu_selection == list(remove_record_menu.get_options())[3]:
+                remove_record(browse_records())
+                print("Returning to Main Menu...")
+                continue
+            else:
+                print("An unknown error occurred...")
+
+        elif main_menu_selection == list(main_menu.get_options())[2]:
+            print(browse_records())
+            print("Returning to Main Menu...")
+            continue
+        elif main_menu_selection == list(main_menu.get_options())[3]:
+            print("Exiting program...")
             exit_program()
         else:
             print("something went wrong")

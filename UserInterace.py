@@ -46,7 +46,7 @@ class MainMenu(Menu):
 
 
 class AddRecordMenu(Menu):
-    """Represents the Add Record menu."""
+    """Represents the Add Record Menu."""
     def __init__(self):
         super().__init__()
         self._menu_title = "Add Record"
@@ -70,3 +70,36 @@ class AddRecordMenu(Menu):
         for key in self._menu_options.keys():
             menu_string += f"{key} --- {self._menu_options[key]}\n"
         return menu_string
+
+
+class RemoveRecordMenu(Menu):
+    """Represents the Remove Record Menu."""
+    def __init__(self):
+        super().__init__()
+        self._menu_title = "Remove Record"
+        self._menu_options = {
+            1: "Search by title of the book",
+            2: "Search by author's name",
+            3: "Search by date the book was completed",
+            4: "View all entries"
+        }
+
+    def menu_header(self):
+        """Returns the Remove Record Menu header."""
+        header = f"{self._menu_title} -- Please select an Option"
+        separator = "-"
+        line = f"{separator * (len(header) + 2)}"
+        return f"{line}\n{header}\n{line}\n"
+
+    def display(self):
+        """Returns the Remove Record Menu."""
+        super().display()
+        menu_string = self.menu_header()
+        for key in self._menu_options.keys():
+            menu_string += f"{key} --- {self._menu_options[key]}\n"
+        return menu_string
+
+    def get_options(self):
+        """Returns the Remove Record Menu options."""
+        return self._menu_options
+
