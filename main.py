@@ -14,7 +14,8 @@ def initiate_database():
     """Creates a sqlite3 database if it does not exist."""
     with closing(sqlite3.connect("book_log.db")) as connection:
         with closing(connection.cursor()) as cursor:
-            cursor.execute("""CREATE TABLE IF NOT EXISTS books (book_id INTEGER PRIMARY KEY,
+            cursor.execute("""CREATE TABLE IF NOT EXISTS books (
+            book_id INTEGER PRIMARY KEY,
             title VARCHAR(200) NOT NULL,
             author VARCHAR(100) NOT NULL,
             date VARCHAR(10))""")
@@ -54,14 +55,14 @@ def search_by_title():
     book_title = prompt_book_title()
     with closing(sqlite3.connect("book_log.db")) as connection:
         with closing(connection.cursor()) as cursor:
-            query = cursor.execute("SELECT * FROM books WHERE title = ?", (book_title,))
+            query = cursor.execute("""SELECT * FROM books WHERE title = ?""", (book_title,)).fetchall()
             results = ""
-            if query.fetchall():
+            if query:
                 for row in query:
                     results += f"{row}\n"
                 return results
             else:
-                return f"No results found with the title {book_title}"
+                return f"No results found with the Book Title {book_title}"
 
 
 def prompt_book_author():
@@ -75,6 +76,21 @@ def prompt_book_author():
             if len(author_name) < 100:
                 break
     return author_name
+
+
+def search_by_author():
+    """Search for a record by Author Name."""
+    author_name = prompt_book_author()
+    with closing(sqlite3.connect("book_log.db")) as connection:
+        with closing(connection.cursor()) as cursor:
+            query = cursor.execute("""SELECT * FROM books WHERE author = ?""", (author_name,)).fetchall()
+            results = ""
+            if query:
+                for row in query:
+                    results += f"{row}\n"
+                return results
+            else:
+                return f"No results found with the Author Name {author_name}"
 
 
 def prompt_date_completed():
@@ -108,10 +124,10 @@ def remove_record(query_results):
             break
     with closing(sqlite3.connect("book_log.db")) as connection:
         with closing(connection.cursor()) as cursor:
-            query = cursor.execute("SELECT * FROM books WHERE book_id = ?", (selection,))
+            query = cursor.execute("""SELECT * FROM books WHERE book_id = ?""", (selection,))
             if query.fetchone():
                 cursor.execute("DELETE FROM books WHERE book_id = ?", (selection,))
-                print(f"Book successfully deleted!\n{query}")
+                print(f"Book successfully deleted!")
                 connection.commit()
             else:
                 print(f"No records found with Book ID {selection}.")
@@ -181,7 +197,7 @@ if __name__ == "__main__":
                 print("Returning to Main Menu...")
                 continue
             elif remove_record_menu_selection == list(remove_record_menu.get_options())[1]:
-                #remove_record(search_by_author())
+                remove_record(search_by_author())
                 print("Returning to Main Menu...")
                 continue
             elif remove_record_menu_selection == list(remove_record_menu.get_options())[2]:
