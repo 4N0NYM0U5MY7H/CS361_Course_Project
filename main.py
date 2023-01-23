@@ -14,11 +14,10 @@ def initiate_database():
     """Creates a sqlite3 database if it does not exist."""
     with closing(sqlite3.connect("book_log.db")) as connection:
         with closing(connection.cursor()) as cursor:
-            cursor.execute("""CREATE TABLE IF NOT EXISTS books
-            (book_id INTEGER PRIMARY KEY,
-            title varchar(200) NOT NULL,
-            author varchar(100) NOT NULL,
-            date varchar(10))""")
+            cursor.execute("""CREATE TABLE IF NOT EXISTS books (book_id INTEGER PRIMARY KEY,
+            title VARCHAR(200) NOT NULL,
+            author VARCHAR(100) NOT NULL,
+            date VARCHAR(10))""")
 
 
 def add_record():
@@ -81,7 +80,13 @@ def remove_record():
 
 def browse_records():
     """Displays all records in the database."""
-    print("handling view records...")
+    print("Displaying all records...")
+    print("Book ID | Title | Author Name | Date Completed")
+    with closing(sqlite3.connect("book_log.db")) as connection:
+        with closing(connection.cursor()) as cursor:
+            results = cursor.execute("SELECT * FROM books ORDER BY title DESC").fetchall()
+            for row in results:
+                print(row)
 
 
 def exit_program():
