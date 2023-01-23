@@ -49,6 +49,21 @@ def prompt_book_title():
     return book_title
 
 
+def search_by_title():
+    """Search for a record by Book Title."""
+    book_title = prompt_book_title()
+    with closing(sqlite3.connect("book_log.db")) as connection:
+        with closing(connection.cursor()) as cursor:
+            query = cursor.execute("SELECT * FROM books WHERE title = ?", (book_title,))
+            results = ""
+            if query.fetchall():
+                for row in query:
+                    results += f"{row}\n"
+                return results
+            else:
+                return f"No results found with the title {book_title}"
+
+
 def prompt_book_author():
     """Prompt the user to enter the author of a book."""
     while True:
@@ -75,6 +90,10 @@ def prompt_date_completed():
 
 def remove_record(query_results):
     """Removes a record from the database."""
+    if "No results found" in query_results:
+        print(query_results)
+        return
+
     print("Displaying records...")
     print("Book ID | Title | Author Name | Date Completed")
     print(query_results)
@@ -158,7 +177,7 @@ if __name__ == "__main__":
                     break
 
             if remove_record_menu_selection == list(remove_record_menu.get_options())[0]:
-                #remove_record(search_by_title())
+                remove_record(search_by_title())
                 print("Returning to Main Menu...")
                 continue
             elif remove_record_menu_selection == list(remove_record_menu.get_options())[1]:
