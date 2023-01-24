@@ -1,7 +1,8 @@
 # Author: August Frisk
 # GitHub username: @4N0NYM0U5MY7H
 # Date: 2023, January 22
-# Description:
+# Description: This file contains all the Menu interface classes
+#              for the CS 361 Book Log program.
 
 
 class Menu:
@@ -102,4 +103,3 @@ class RemoveRecordMenu(Menu):
     def get_options(self):
         """Returns the Remove Record Menu options."""
         return self._menu_options
-
