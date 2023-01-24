@@ -18,7 +18,6 @@ def continue_to_main_menu():
     """Prompts the user to continue to the Main Menu."""
     input("Press ENTER to continue...")
     print("Returning to Main Menu...")
-    time.sleep(1)
 
 
 if __name__ == "__main__":
@@ -50,7 +49,6 @@ if __name__ == "__main__":
 
         # ADD NEW RECORD
         if main_menu_input == valid_main_menu_options[0]:
-            time.sleep(1)
             print(add_record_menu.display())
             book_database.add_new_record()
             continue_to_main_menu()
@@ -58,7 +56,6 @@ if __name__ == "__main__":
 
         # DELETE A RECORD
         elif main_menu_input == valid_main_menu_options[1]:
-            time.sleep(1)
             print(remove_record_menu.display())
             print("Input a number and press ENTER to select an option.")
             while True:
@@ -83,7 +80,9 @@ if __name__ == "__main__":
             elif remove_record_menu_input == valid_remove_record_menu_options[3]:
                 search_results = book_database.view_all_records()
             else:
-                print("An unknown error occurred...")
+                print(f"Only INTEGERS from 1 to 4 are accepted!")
+                continue_to_main_menu()
+                continue
 
             if "No results found" in search_results:
                 print(search_results)
@@ -109,5 +108,6 @@ if __name__ == "__main__":
             print("Exiting program...")
             exit_program()
         else:
-            print("something went wrong")
+            print(f"Only INTEGERS from 1 to 4 are accepted!")
+            continue
         break

@@ -69,7 +69,6 @@ class BookLogDB:
         except sqlite3.Error as error:
             print(f"add_new_record: {error}")
 
-
     def delete_a_record(self):
         """Deletes a record from the database."""
         print("Enter a Book ID to delete.")
@@ -87,10 +86,21 @@ class BookLogDB:
             with closing(self.create_connection()) as connection:
                 with closing(connection.cursor()) as cursor:
                     query = cursor.execute(sql_select_string, (user_input,))
-                    if query.fetchone():
-                        cursor.execute(sql_delete_string, (user_input,))
-                        print(f"Book successfully deleted!")
-                        connection.commit()
+                    query_string = query.fetchone()
+                    if query_string:
+                        print("Are you sure you want to delete this from your records?")
+                        print(query_string)
+                        while True:
+                            print("Type 'yes' to continue or press ENTER to cancel.")
+                            continue_prompt = input("Your input: ")
+                            if continue_prompt.lower() == "yes":
+                                cursor.execute(sql_delete_string, (user_input,))
+                                print("Book successfully deleted!")
+                                connection.commit()
+                                break
+                            else:
+                                print("Canceling delete Request.")
+                                break
                     else:
                         print(f"No records found with Book ID {user_input}.")
         except sqlite3.Error as error:
@@ -116,18 +126,19 @@ class BookLogDB:
             print("Enter a Book Title.\n" +
                   "Must only use A(a)-Z(z). Can include spaces.\n" +
                   "Must be less than 200 characters.")
-            book_title = input("Book Title: ")
+            book_title = input("Book Title: ").title()
             if re.search("^[a-zA-Z\s]+$", book_title):
                 if len(book_title) < 201:
                     break
         return book_title
+
     def prompt_user_for_author_name(self):
         """Prompt the user to enter the author of a book."""
         while True:
             print("Enter an Author's name.\n" +
                   "Must only use A(a)-Z(z). Can include spaces.\n" +
                   "Must be less than 100 characters.")
-            author_name = input("Author Name: ")
+            author_name = input("Author Name: ").title()
             if re.search("^[a-zA-Z\s]+$", author_name):
                 if len(author_name) < 100:
                     break
@@ -138,8 +149,8 @@ class BookLogDB:
         while True:
             print("Enter a date the book was completed.\n"
                   + "Must be in the following format: MM/DD/YYYY.")
-            date_completed = input("Book Title: ")
-            if re.match("(\d{2})[/.-](\d{2})[/.-](\d{4})$", date_completed):
+            date_completed = input("Date Completed: ")
+            if re.match("(\d{2})[/](\d{2})[/](\d{4})$", date_completed):
                 break
         return date_completed
 
