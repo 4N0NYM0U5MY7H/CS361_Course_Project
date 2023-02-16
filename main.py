@@ -12,7 +12,7 @@ from UserInterace import MainMenu, AddRecordMenu, RemoveRecordMenu, SearchRecord
 from BookLogDB import BookLogDB
 
 
-__version__ = "1.1.1"
+__version__ = "1.2.1"
 
 
 def exit_program():
@@ -148,8 +148,14 @@ if __name__ == "__main__":
             if browser_view_input == "YES":
                 # TO DO
                 # cast search_results to JSON
+                search_results = book_database.generate_json_data()
+                json_string = json.dumps(search_results)
+                with open("request.json", "w") as out_file:
+                    out_file.write(str(json_string))
                 # wait for response from partner's microservice
                 # open generated webpage
+                webbrowser.open("results.html")
+                continue_to_main_menu()
                 continue
 
         # VIEW ALL RECORDS
@@ -186,6 +192,8 @@ if __name__ == "__main__":
                 # cast search_results to JSON
                 # wait for response from partner's microservice
                 # open generated webpage
+                webbrowser.open("results.html")
+                continue_to_main_menu()
                 continue
 
             # DELETE A RECORD

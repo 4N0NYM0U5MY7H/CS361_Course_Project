@@ -1,6 +1,6 @@
 # Author: August Frisk
 # GitHub username: @4N0NYM0U5MY7H
-# Date: 2023, January 23
+# Date: 2023, February 16
 # Description: This class represents the database for the
 #              CS 361 Book Log program.
 
@@ -9,7 +9,7 @@ import sqlite3
 from contextlib import closing
 
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
 
 class BookLogDB:
@@ -27,6 +27,7 @@ class BookLogDB:
         self._sqlite_file = "book_log.db"
         self._connection = self.create_connection()
         self.create_table()
+        self._previous_query = None
 
     def create_connection(self):
         """Establishes a connection to the database."""
@@ -41,6 +42,12 @@ class BookLogDB:
             self._connection.close()
         except sqlite3.Error as error:
             print(f"__del__: {error}")
+
+    def _dictionary_factory(self, cursor, row):
+        """Returns rows as a dict with column names mapped to values."""
+        # source: https://docs.python.org/3/library/sqlite3.html#how-to-create-and-use-row-factories
+        fields = [column[0] for column in cursor.description]
+        return {key: value for key, value in zip(fields, row)}
 
     def create_table(self):
         """Creates a table if it does not exist."""
@@ -123,6 +130,7 @@ class BookLogDB:
             with closing(self.create_connection()) as connection:
                 with closing(connection.cursor()) as cursor:
                     query = cursor.execute(sql_string).fetchall()
+                    self._previous_query = sql_string
                     results = ""
                     for row in query:
                         results += f"{row}\n"
@@ -178,6 +186,7 @@ class BookLogDB:
             with closing(self.create_connection()) as connection:
                 with closing(connection.cursor()) as cursor:
                     query = cursor.execute(sql_string, (book_title,)).fetchall()
+                    self._previous_query = sql_string, (book_title,)
                     results = ""
                     if query:
                         for row in query:
@@ -196,6 +205,7 @@ class BookLogDB:
             with closing(self.create_connection()) as connection:
                 with closing(connection.cursor()) as cursor:
                     query = cursor.execute(sql_string, (author_name,)).fetchall()
+                    self._previous_query = sql_string, (author_name,)
                     results = ""
                     if query:
                         for row in query:
@@ -214,6 +224,7 @@ class BookLogDB:
             with closing(self.create_connection()) as connection:
                 with closing(connection.cursor()) as cursor:
                     query = cursor.execute(sql_string, (date_completed,)).fetchall()
+                    self._previous_query = sql_string, (date_completed,)
                     results = ""
                     if query:
                         for row in query:
@@ -223,3 +234,16 @@ class BookLogDB:
                         return f"No results found with the Completion Date {date_completed}"
         except sqlite3.Error as error:
             print(f"search_by_date: {error}")
+
+    def generate_json_data(self):
+        """."""
+        try:
+            with closing(self.create_connection()) as connection:
+                connection.row_factory = self._dictionary_factory
+                with closing(connection.cursor()) as cursor:
+                    results = []
+                    for row in connection.execute(str(self._previous_query)):
+                        results.append(row)
+                    return dict({"books": results})
+        except sqlite3.Error as error:
+            print(f"generate_json: {error}")
