@@ -9,8 +9,12 @@ import sqlite3
 from contextlib import closing
 
 
+__version__ = "1.0.0"
+
+
 class BookLogDB:
     """Represents a Book Log Database object."""
+
     instance = None
 
     def __new__(cls, *args, **kwargs):
@@ -62,9 +66,13 @@ class BookLogDB:
         try:
             with closing(self.create_connection()) as connection:
                 with closing(connection.cursor()) as cursor:
-                    cursor.execute(sql_string, (book_title, author_name, date_completed))
+                    cursor.execute(
+                        sql_string, (book_title, author_name, date_completed)
+                    )
                 connection.commit()
-            success_string = f"{book_title} by {author_name} completed on {date_completed}."
+            success_string = (
+                f"{book_title} by {author_name} completed on {date_completed}."
+            )
             print(f"Book successfully added!\n{success_string}")
         except sqlite3.Error as error:
             print(f"add_new_record: {error}")
@@ -76,6 +84,8 @@ class BookLogDB:
         while True:
             try:
                 user_input = int(input("Your input: "))
+                if re.search("[0-9]+", str(user_input)) is None:
+                    raise ValueError
             except ValueError:
                 continue
             else:
@@ -123,9 +133,11 @@ class BookLogDB:
     def prompt_user_for_book_title(self):
         """Prompt the user to enter the title of a book."""
         while True:
-            print("Enter a Book Title.\n" +
-                  "Must only use A(a)-Z(z). Can include spaces.\n" +
-                  "Must be less than 200 characters.")
+            print(
+                "Enter a Book Title.\n"
+                + "Must only use A(a)-Z(z). Can include spaces.\n"
+                + "Must be less than 200 characters."
+            )
             book_title = input("Book Title: ").title()
             if re.search("^[a-zA-Z\s]+$", book_title):
                 if len(book_title) < 201:
@@ -135,9 +147,11 @@ class BookLogDB:
     def prompt_user_for_author_name(self):
         """Prompt the user to enter the author of a book."""
         while True:
-            print("Enter an Author's name.\n" +
-                  "Must only use A(a)-Z(z). Can include spaces.\n" +
-                  "Must be less than 100 characters.")
+            print(
+                "Enter an Author's name.\n"
+                + "Must only use A(a)-Z(z). Can include spaces.\n"
+                + "Must be less than 100 characters."
+            )
             author_name = input("Author Name: ").title()
             if re.search("^[a-zA-Z\s]+$", author_name):
                 if len(author_name) < 100:
@@ -147,8 +161,10 @@ class BookLogDB:
     def prompt_user_for_date_completed(self):
         """Prompt the user to enter the date a book was completed."""
         while True:
-            print("Enter a date the book was completed.\n"
-                  + "Must be in the following format: MM/DD/YYYY.")
+            print(
+                "Enter a date the book was completed.\n"
+                + "Must be in the following format: MM/DD/YYYY."
+            )
             date_completed = input("Date Completed: ")
             if re.match("(\d{2})[/](\d{2})[/](\d{4})$", date_completed):
                 break

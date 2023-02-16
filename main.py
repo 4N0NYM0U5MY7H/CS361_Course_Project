@@ -3,10 +3,16 @@
 # Date: 2023, January 21
 # Description: The main driver program for the CS 361 Book Log program.
 
+import re
 import sys
 import time
-from UserInterace import MainMenu, AddRecordMenu, RemoveRecordMenu
+import json
+import webbrowser
+from UserInterace import MainMenu, AddRecordMenu, RemoveRecordMenu, SearchRecordsMenu
 from BookLogDB import BookLogDB
+
+
+__version__ = "1.1.0"
 
 
 def exit_program():
@@ -20,6 +26,44 @@ def continue_to_main_menu():
     print("Returning to Main Menu...")
 
 
+def search_records(database, menu):
+    """Returns search results from the book database."""
+    valid_search_options = list(menu.get_options())
+
+    print("Input a number and press ENTER to select an option.")
+    while True:
+        try:
+            search_selection = int(input("Your input: "))
+            if (
+                re.search(
+                    f"[{valid_search_options[0]}-{valid_search_options[-1]}]",
+                    str(search_selection),
+                )
+                is None
+            ):
+                raise ValueError
+        except ValueError:
+            print(
+                f"Only INTEGER values between {valid_search_options[0]} and {valid_search_options[-1]} accepted!"
+            )
+            continue
+        else:
+            break
+
+    # SEARCH BY TITLE
+    if search_selection == valid_search_options[0]:
+        return database.search_by_title()
+    # SEARCH BY AUTHOR
+    elif search_selection == valid_search_options[1]:
+        return database.search_by_author()
+    # SEARCH BY DATE
+    elif search_selection == valid_search_options[2]:
+        return database.search_by_date()
+    # VIEW ALL RECORDS
+    elif search_selection == valid_search_options[3]:
+        return database.view_all_records()
+
+
 if __name__ == "__main__":
     """Main driver program for the CS 361 Portfolio Project."""
 
@@ -29,9 +73,12 @@ if __name__ == "__main__":
     main_menu = MainMenu()
     add_record_menu = AddRecordMenu()
     remove_record_menu = RemoveRecordMenu()
+    search_records_menu = SearchRecordsMenu()
 
     print(f"Welcome to the {program_title}!\n{program_subtitle}.")
     time.sleep(2)
+
+    valid_main_menu_options = list(main_menu.get_options())
 
     while True:
         print(main_menu.display())
@@ -39,13 +86,21 @@ if __name__ == "__main__":
         while True:
             try:
                 main_menu_input = int(input("Your input: "))
+                if (
+                    re.search(
+                        f"[{valid_main_menu_options[0]}-{valid_main_menu_options[-1]}]",
+                        str(main_menu_input),
+                    )
+                    is None
+                ):
+                    raise ValueError
             except ValueError:
-                print(f"Only INTEGERS from 1 to 4 are accepted!")
+                print(
+                    f"Only INTEGERS from {valid_main_menu_options[0]} to {valid_main_menu_options[-1]} are accepted!"
+                )
                 continue
             else:
                 break
-
-        valid_main_menu_options = list(main_menu.get_options())
 
         # ADD NEW RECORD
         if main_menu_input == valid_main_menu_options[0]:
@@ -54,35 +109,89 @@ if __name__ == "__main__":
             continue_to_main_menu()
             continue
 
-        # DELETE A RECORD
+        # SEARCH RECORDS
         elif main_menu_input == valid_main_menu_options[1]:
-            print(remove_record_menu.display())
-            print("Input a number and press ENTER to select an option.")
+            print(search_records_menu.display())
+            search_results = search_records(book_database, search_records_menu)
+
+            if "No results found" in search_results:
+                print(search_results)
+                continue_to_main_menu()
+                continue
+
+            # PROMPT FOR WEB VIEW
+            print("View results in a web browser?")
+            print("Type 'yes' or 'no' and press ENTER to select an option.")
             while True:
                 try:
-                    remove_record_menu_input = int(input("Your input: "))
+                    browser_view_input = input("Your input: ").upper()
+                    if (
+                        re.search("^([yY][eE][sS])|([nN][oO])$", browser_view_input)
+                        is None
+                    ):
+                        raise ValueError
                 except ValueError:
-                    print(f"Only INTEGER values between 1 and 4 accepted")
+                    print("Only 'yes' or 'no' are accepted")
                     continue
                 else:
                     break
-            valid_remove_record_menu_options = list(remove_record_menu.get_options())
-            # SEARCH BY TITLE
-            if remove_record_menu_input == valid_remove_record_menu_options[0]:
-                search_results = book_database.search_by_title()
-            # SEARCH BY AUTHOR
-            elif remove_record_menu_input == valid_remove_record_menu_options[1]:
-                search_results = book_database.search_by_author()
-            # SEARCH BY DATE
-            elif remove_record_menu_input == valid_remove_record_menu_options[2]:
-                search_results = book_database.search_by_date()
-            # VIEW ALL RECORDS
-            elif remove_record_menu_input == valid_remove_record_menu_options[3]:
-                search_results = book_database.view_all_records()
-            else:
-                print(f"Only INTEGERS from 1 to 4 are accepted!")
+
+            # VIEW RESULTS IN CONSOLE
+            if browser_view_input == "NO":
+                print("Displaying records...")
+                print("Book ID | Title | Author Name | Date Completed")
+                print(search_results)
                 continue_to_main_menu()
                 continue
+
+            # VIEW RESULTS IN BROWSER
+            if browser_view_input == "YES":
+                # TO DO
+                # cast search_results to JSON
+                # wait for response from partner's microservice
+                # open generated webpage
+                continue
+
+        # VIEW ALL RECORDS
+        elif main_menu_input == valid_main_menu_options[2]:
+
+            # PROMPT FOR WEB VIEW
+            print("View results in a web browser?")
+            print("Type 'yes' or 'no' and press ENTER to select an option.")
+            while True:
+                try:
+                    browser_view_input = input("Your input: ").upper()
+                    if (
+                        re.search("^([Yy][Ee][Ss])|([Nn][Oo])$", browser_view_input)
+                        is None
+                    ):
+                        raise ValueError
+                except ValueError:
+                    print("Only 'yes' or 'no' are accepted")
+                    continue
+                else:
+                    break
+
+            # VIEW RESULTS IN CONSOLE
+            if browser_view_input == "NO":
+                print("Displaying records...")
+                print("Book ID | Title | Author Name | Date Completed")
+                print(book_database.view_all_records())
+                continue_to_main_menu()
+                continue
+
+            # VIEW RESULTS IN BROWSER
+            if browser_view_input == "YES":
+                # TO DO
+                # cast search_results to JSON
+                # wait for response from partner's microservice
+                # open generated webpage
+                continue
+
+            # DELETE A RECORD
+        elif main_menu_input == valid_main_menu_options[3]:
+            print(remove_record_menu.display())
+            search_results = search_records(book_database, remove_record_menu)
 
             if "No results found" in search_results:
                 print(search_results)
@@ -95,19 +204,7 @@ if __name__ == "__main__":
             continue_to_main_menu()
             continue
 
-        # VIEW ALL RECORDS
-        elif main_menu_input == valid_main_menu_options[2]:
-            print("Displaying records...")
-            print("Book ID | Title | Author Name | Date Completed")
-            print(book_database.view_all_records())
-            continue_to_main_menu()
-            continue
-
         # EXIT PROGRAM
-        elif main_menu_input == valid_main_menu_options[3]:
+        elif main_menu_input == valid_main_menu_options[-1]:
             print("Exiting program...")
             exit_program()
-        else:
-            print(f"Only INTEGERS from 1 to 4 are accepted!")
-            continue
-        break
