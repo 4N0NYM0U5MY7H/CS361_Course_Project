@@ -1,6 +1,6 @@
 # Author: August Frisk
 # GitHub username: @4N0NYM0U5MY7H
-# Date: 2023, January 21
+# Date: 2023, February 16
 # Description: The main driver program for the CS 361 Book Log program.
 
 import re
@@ -12,7 +12,7 @@ from UserInterace import MainMenu, AddRecordMenu, RemoveRecordMenu, SearchRecord
 from BookLogDB import BookLogDB
 
 
-__version__ = "1.1.0"
+__version__ = "1.1.1"
 
 
 def exit_program():
@@ -35,7 +35,7 @@ def search_records(database, menu):
         try:
             search_selection = int(input("Your input: "))
             if (
-                re.search(
+                re.match(
                     f"[{valid_search_options[0]}-{valid_search_options[-1]}]",
                     str(search_selection),
                 )
@@ -87,7 +87,7 @@ if __name__ == "__main__":
             try:
                 main_menu_input = int(input("Your input: "))
                 if (
-                    re.search(
+                    re.match(
                         f"[{valid_main_menu_options[0]}-{valid_main_menu_options[-1]}]",
                         str(main_menu_input),
                     )
@@ -126,7 +126,7 @@ if __name__ == "__main__":
                 try:
                     browser_view_input = input("Your input: ").upper()
                     if (
-                        re.search("^([yY][eE][sS])|([nN][oO])$", browser_view_input)
+                        re.match("^([yY][eE][sS])|([nN][oO])$", browser_view_input)
                         is None
                     ):
                         raise ValueError
@@ -162,7 +162,7 @@ if __name__ == "__main__":
                 try:
                     browser_view_input = input("Your input: ").upper()
                     if (
-                        re.search("^([Yy][Ee][Ss])|([Nn][Oo])$", browser_view_input)
+                        re.match("^([Yy][Ee][Ss])|([Nn][Oo])$", browser_view_input)
                         is None
                     ):
                         raise ValueError
