@@ -1,14 +1,15 @@
 # Author: August Frisk
 # GitHub username: @4N0NYM0U5MY7H
-# Date: 2023, February 17
+# Date: 2023, February 18
 
-r"""User interface class representing menus and options for the CS361 book tracking program."""
+import re
 
-
-__version__ = "2.0.1"
+__version__ = "2.1.1"
 
 
 class UserInterface:
+    """User interface class representing menus and options for the CS361 book tracking program."""
+
     def __init__(self, title, options=None):
         super().__init__()
         self._menu_title = title
@@ -31,3 +32,23 @@ class UserInterface:
 
     def get_options(self):
         return self._menu_options
+
+    def get_user_input(self):
+        minimum_value = list(self._menu_options)[0]
+        maximum_value = list(self._menu_options)[-1]
+        print("Input a number and press ENTER to select an option.")
+        while True:
+            try:
+                user_selection = int(input("Your input: "))
+                if (
+                    re.match(f"[{minimum_value}-{maximum_value}]", str(user_selection))
+                    is None
+                ):
+                    raise ValueError
+            except ValueError:
+                print(
+                    f"Only INTEGERS from {minimum_value} to {maximum_value} are accepted!"
+                )
+                continue
+            else:
+                return user_selection
