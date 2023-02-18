@@ -1,79 +1,90 @@
 # Author: August Frisk
 # GitHub username: @4N0NYM0U5MY7H
-# Date: 2023, February 16
+# Date: 2023, February 18
 # Description: The main driver program for the CS 361 Book Log program.
 
 import re
 import sys
+import os
 import time
 import json
 import webbrowser
-from UserInterace import MainMenu, AddRecordMenu, RemoveRecordMenu, SearchRecordsMenu
+from UserInterace import UserInterface
 from BookLogDB import BookLogDB
 
 
-__version__ = "1.2.1"
+__version__ = "1.3.0"
 
 
 def exit_program():
-    """Exits the program."""
     return sys.exit()
 
 
 def continue_to_main_menu():
-    """Prompts the user to continue to the Main Menu."""
     input("Press ENTER to continue...")
     print("Returning to Main Menu...")
 
 
-def search_records(database, menu):
-    """Returns search results from the book database."""
+def search_records(database=BookLogDB, menu=UserInterface):
     valid_search_options = list(menu.get_options())
+    search_selection = menu.get_user_input()
 
-    print("Input a number and press ENTER to select an option.")
-    while True:
-        try:
-            search_selection = int(input("Your input: "))
-            if (
-                re.match(
-                    f"[{valid_search_options[0]}-{valid_search_options[-1]}]",
-                    str(search_selection),
-                )
-                is None
-            ):
-                raise ValueError
-        except ValueError:
-            print(
-                f"Only INTEGER values between {valid_search_options[0]} and {valid_search_options[-1]} accepted!"
-            )
-            continue
-        else:
-            break
-
-    # SEARCH BY TITLE
     if search_selection == valid_search_options[0]:
         return database.search_by_title()
-    # SEARCH BY AUTHOR
     elif search_selection == valid_search_options[1]:
         return database.search_by_author()
-    # SEARCH BY DATE
     elif search_selection == valid_search_options[2]:
         return database.search_by_date()
-    # VIEW ALL RECORDS
     elif search_selection == valid_search_options[3]:
         return database.view_all_records()
 
 
-if __name__ == "__main__":
-    """Main driver program for the CS 361 Portfolio Project."""
+def prompt_for_web_view():
+    pass
 
-    program_title = "CS 361 Book Log"
+
+def view_results_in_console():
+    pass
+
+
+def view_results_in_browser():
+    pass
+
+
+def display_records():
+    pass
+
+
+if __name__ == "__main__":
+
+    program_title = "CS361 Book Log"
     program_subtitle = "Tracking your reading since 2023"
     book_database = BookLogDB()
-    main_menu = MainMenu()
-    add_record_menu = AddRecordMenu()
-    remove_record_menu = RemoveRecordMenu()
-    search_records_menu = SearchRecordsMenu()
+
+    main_menu_options = {
+        1: "Add a book to your records",
+        2: "Search for a book",
+        3: "View all books in your records",
+        4: "Remove a book from your records",
+        5: "Exit Program",
+    }
+    main_menu = UserInterface("Main Menu", main_menu_options)
+
+    add_record_menu_options = {
+        "Book Title": "Title of the book",
+        "Author Name": "First and last name of the author",
+        "Date Completed": "Date the book was completed",
+    }
+    add_record_menu = UserInterface("Add Record", add_record_menu_options)
+
+    search_records_menu_options = {
+        1: "Search by title of the book",
+        2: "Search by author's name",
+        3: "Search by date the book was completed",
+        4: "View all entries",
+    }
+    search_records_menu = UserInterface("Search Records", search_records_menu_options)
+    remove_record_menu = UserInterface("Remove Record", search_records_menu_options)
 
     print(f"Welcome to the {program_title}!\n{program_subtitle}.")
     time.sleep(2)
@@ -82,36 +93,20 @@ if __name__ == "__main__":
 
     while True:
         print(main_menu.display())
-        print("Input a number and press ENTER to select an option.")
-        while True:
-            try:
-                main_menu_input = int(input("Your input: "))
-                if (
-                    re.match(
-                        f"[{valid_main_menu_options[0]}-{valid_main_menu_options[-1]}]",
-                        str(main_menu_input),
-                    )
-                    is None
-                ):
-                    raise ValueError
-            except ValueError:
-                print(
-                    f"Only INTEGERS from {valid_main_menu_options[0]} to {valid_main_menu_options[-1]} are accepted!"
-                )
-                continue
-            else:
-                break
+        main_menu_selection = main_menu.get_user_input()
 
         # ADD NEW RECORD
-        if main_menu_input == valid_main_menu_options[0]:
+        if main_menu_selection == valid_main_menu_options[0]:
             print(add_record_menu.display())
             book_database.add_new_record()
             continue_to_main_menu()
             continue
 
         # SEARCH RECORDS
-        elif main_menu_input == valid_main_menu_options[1]:
+        elif main_menu_selection == valid_main_menu_options[1]:
             print(search_records_menu.display())
+            search_menu_selection = search_records_menu.get_user_input()
+
             search_results = search_records(book_database, search_records_menu)
 
             if "No results found" in search_results:
@@ -147,19 +142,71 @@ if __name__ == "__main__":
             # VIEW RESULTS IN BROWSER
             if browser_view_input == "YES":
                 # TO DO
-                # cast search_results to JSON
+                # [x] cast search_results to JSON
+                # [ ] recieve response from partner's microservice
+                # [x] open generated webpage
+                # [ ] code clean-up
+
+                # Microservice communication files
+                # Waiting for partner to finish microservice
+                path_to_txt_file = "microservice/books.txt"
+                path_to_json_file = "microservice/request.json"
+                path_to_html_file = "microservice/results.html"
+
                 search_results = book_database.generate_json_data()
                 json_string = json.dumps(search_results)
-                with open("request.json", "w") as out_file:
-                    out_file.write(str(json_string))
-                # wait for response from partner's microservice
-                # open generated webpage
-                webbrowser.open("results.html")
+
+                # output json file
+                try:
+                    with open(path_to_json_file, "w") as out_file:
+                        try:
+                            out_file.write(str(json_string))
+                        except OSError as error:
+                            print(f"Create JSON: {error}")
+                            continue_to_main_menu()
+                            continue
+                except PermissionError as error:
+                    print(f"Create JSON: {error}")
+                    continue_to_main_menu()
+                    continue
+
+                # Send reponse to txt (current iteration of microservice)
+                try:
+                    with open(path_to_txt_file, "w") as out_file:
+                        try:
+                            out_file.write("request")
+                        except OSError as error:
+                            print(f"Send Request: {error}")
+                            continue_to_main_menu()
+                            continue
+                except PermissionError as error:
+                    print(f"Send Request: {error}")
+                    continue_to_main_menu()
+                    continue
+
+                print("Waiting for response from microservice...")
+                while True:
+                    time.sleep(1)
+                    try:
+                        with open(path_to_html_file, "r") as response:
+                            try:
+                                response.readline()
+                            except OSError as error:
+                                print(f"Recieve Response: {error}")
+                    except PermissionError as error:
+                        print(f"Receive Response: {error}")
+                    except FileNotFoundError:
+                        print("The microservice failed to respond.")
+                        continue
+                    else:
+                        break
+                # webbrowser.open(path_to_html_file)
+                webbrowser.open("file://" + os.path.realpath(path_to_html_file))
                 continue_to_main_menu()
                 continue
 
         # VIEW ALL RECORDS
-        elif main_menu_input == valid_main_menu_options[2]:
+        elif main_menu_selection == valid_main_menu_options[2]:
 
             # PROMPT FOR WEB VIEW
             print("View results in a web browser?")
@@ -196,8 +243,8 @@ if __name__ == "__main__":
                 continue_to_main_menu()
                 continue
 
-            # DELETE A RECORD
-        elif main_menu_input == valid_main_menu_options[3]:
+        # DELETE A RECORD
+        elif main_menu_selection == valid_main_menu_options[3]:
             print(remove_record_menu.display())
             search_results = search_records(book_database, remove_record_menu)
 
@@ -213,6 +260,6 @@ if __name__ == "__main__":
             continue
 
         # EXIT PROGRAM
-        elif main_menu_input == valid_main_menu_options[-1]:
+        elif main_menu_selection == valid_main_menu_options[-1]:
             print("Exiting program...")
             exit_program()
