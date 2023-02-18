@@ -4,30 +4,11 @@
 
 r"""User interface class representing menus and options for the CS361 book tracking program."""
 
-from abc import ABC, abstractmethod
 
-__version__ = "2.0.0"
-
-
-class _Menu(ABC):
-    @abstractmethod
-    def __init__(self):
-        pass
-
-    @abstractmethod
-    def _menu_header(self):
-        pass
-
-    @abstractmethod
-    def display(self):
-        pass
-
-    @abstractmethod
-    def get_options(self):
-        pass
+__version__ = "2.0.1"
 
 
-class UserInterface(_Menu):
+class UserInterface:
     def __init__(self, title, options=None):
         super().__init__()
         self._menu_title = title
