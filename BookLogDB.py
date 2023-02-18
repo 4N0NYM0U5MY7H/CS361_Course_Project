@@ -9,7 +9,7 @@ import sqlite3
 from contextlib import closing
 
 
-__version__ = "1.1.0"
+__version__ = "1.1.1"
 
 
 class BookLogDB:
@@ -18,6 +18,7 @@ class BookLogDB:
     instance = None
 
     def __new__(cls, *args, **kwargs):
+        """Implement the singleton design pattern."""
         if cls.instance is None:
             cls.instance = super().__new__(BookLogDB)
             return cls.instance
@@ -25,23 +26,21 @@ class BookLogDB:
 
     def __init__(self):
         self._sqlite_file = "book_log.db"
-        self._connection = self.create_connection()
+        self._connection = self._create_connection()
         self.create_table()
         self._previous_query = None
 
-    def create_connection(self):
-        """Establishes a connection to the database."""
-        try:
-            return sqlite3.connect(self._sqlite_file)
-        except sqlite3.Error as error:
-            print(f"create_connection: {error}")
-
     def __del__(self):
-        """Closes a connection to the database."""
         try:
             self._connection.close()
         except sqlite3.Error as error:
             print(f"__del__: {error}")
+
+    def _create_connection(self):
+        try:
+            return sqlite3.connect(self._sqlite_file)
+        except sqlite3.Error as error:
+            print(f"create_connection: {error}")
 
     def _dictionary_factory(self, cursor, row):
         """Returns rows as a dict with column names mapped to values."""
@@ -50,7 +49,6 @@ class BookLogDB:
         return {key: value for key, value in zip(fields, row)}
 
     def create_table(self):
-        """Creates a table if it does not exist."""
         sql_string = """CREATE TABLE IF NOT EXISTS books(
                         book_id INTEGER PRIMARY KEY,
                         title VARCHAR(200) NOT NULL,
@@ -64,14 +62,13 @@ class BookLogDB:
             print(f"create_table: {error}")
 
     def add_new_record(self):
-        """Adds a new record to the database."""
         book_title = self.prompt_user_for_book_title()
         author_name = self.prompt_user_for_author_name()
         date_completed = self.prompt_user_for_date_completed()
         sql_string = """INSERT INTO books(title, author, date)
                         VALUES (?,?,?)"""
         try:
-            with closing(self.create_connection()) as connection:
+            with closing(self._create_connection()) as connection:
                 with closing(connection.cursor()) as cursor:
                     cursor.execute(
                         sql_string, (book_title, author_name, date_completed)
@@ -100,7 +97,7 @@ class BookLogDB:
         sql_select_string = """SELECT * FROM books WHERE book_id = ?"""
         sql_delete_string = """DELETE FROM books WHERE book_id = ?"""
         try:
-            with closing(self.create_connection()) as connection:
+            with closing(self._create_connection()) as connection:
                 with closing(connection.cursor()) as cursor:
                     query = cursor.execute(sql_select_string, (user_input,))
                     query_string = query.fetchone()
@@ -127,7 +124,7 @@ class BookLogDB:
         """Displays all records in the database."""
         sql_string = """SELECT * FROM books ORDER BY title DESC"""
         try:
-            with closing(self.create_connection()) as connection:
+            with closing(self._create_connection()) as connection:
                 with closing(connection.cursor()) as cursor:
                     query = cursor.execute(sql_string).fetchall()
                     self._previous_query = sql_string
@@ -183,7 +180,7 @@ class BookLogDB:
         book_title = self.prompt_user_for_book_title()
         sql_string = """SELECT * FROM books WHERE title = ?"""
         try:
-            with closing(self.create_connection()) as connection:
+            with closing(self._create_connection()) as connection:
                 with closing(connection.cursor()) as cursor:
                     query = cursor.execute(sql_string, (book_title,)).fetchall()
                     self._previous_query = sql_string, (book_title,)
@@ -202,7 +199,7 @@ class BookLogDB:
         author_name = self.prompt_user_for_author_name()
         sql_string = """SELECT * FROM books WHERE author = ?"""
         try:
-            with closing(self.create_connection()) as connection:
+            with closing(self._create_connection()) as connection:
                 with closing(connection.cursor()) as cursor:
                     query = cursor.execute(sql_string, (author_name,)).fetchall()
                     self._previous_query = sql_string, (author_name,)
@@ -221,7 +218,7 @@ class BookLogDB:
         date_completed = self.prompt_user_for_date_completed()
         sql_string = """SELECT * FROM books WHERE date = ?"""
         try:
-            with closing(self.create_connection()) as connection:
+            with closing(self._create_connection()) as connection:
                 with closing(connection.cursor()) as cursor:
                     query = cursor.execute(sql_string, (date_completed,)).fetchall()
                     self._previous_query = sql_string, (date_completed,)
@@ -236,11 +233,11 @@ class BookLogDB:
             print(f"search_by_date: {error}")
 
     def generate_json_data(self):
-        """."""
+        """Returns search reslts in a JSON ready dictionary."""
         try:
-            with closing(self.create_connection()) as connection:
+            with closing(self._create_connection()) as connection:
                 connection.row_factory = self._dictionary_factory
-                with closing(connection.cursor()) as cursor:
+                with closing(connection.cursor()):
                     results = []
                     for row in connection.execute(str(self._previous_query)):
                         results.append(row)
