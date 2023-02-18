@@ -4,7 +4,7 @@
 
 import re
 
-__version__ = "2.1.1"
+__version__ = "2.1.2"
 
 
 class UserInterface:
@@ -33,7 +33,7 @@ class UserInterface:
     def get_options(self):
         return self._menu_options
 
-    def get_user_input(self):
+    def get_menu_selection(self):
         minimum_value = list(self._menu_options)[0]
         maximum_value = list(self._menu_options)[-1]
         print("Input a number and press ENTER to select an option.")

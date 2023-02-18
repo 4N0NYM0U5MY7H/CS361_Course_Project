@@ -13,7 +13,7 @@ from UserInterace import UserInterface
 from BookLogDB import BookLogDB
 
 
-__version__ = "1.3.0"
+__version__ = "1.3.1"
 
 
 def exit_program():
@@ -27,7 +27,7 @@ def continue_to_main_menu():
 
 def search_records(database=BookLogDB, menu=UserInterface):
     valid_search_options = list(menu.get_options())
-    search_selection = menu.get_user_input()
+    search_selection = menu.get_menu_selection()
 
     if search_selection == valid_search_options[0]:
         return database.search_by_title()
@@ -39,19 +39,28 @@ def search_records(database=BookLogDB, menu=UserInterface):
         return database.view_all_records()
 
 
-def prompt_for_web_view():
-    pass
+def prompt_for_viewport():
+    print("View results in a web browser?")
+    print("Type 'yes' or 'no' and press ENTER to select an option.")
+    while True:
+        try:
+            user_selection = input("Your input: ").upper()
+            if re.match("^([yY][eE][sS])|([nN][oO])$", user_selection) is None:
+                raise ValueError
+        except ValueError:
+            print("Only 'yes' or 'no' are accepted")
+            continue
+        else:
+            return user_selection
 
 
-def view_results_in_console():
-    pass
+def view_in_console(search_results):
+    print("Displaying records...")
+    print("Book ID | Title | Author Name | Date Completed")
+    print(search_results)
 
 
 def view_results_in_browser():
-    pass
-
-
-def display_records():
     pass
 
 
@@ -93,7 +102,7 @@ if __name__ == "__main__":
 
     while True:
         print(main_menu.display())
-        main_menu_selection = main_menu.get_user_input()
+        main_menu_selection = main_menu.get_menu_selection()
 
         # ADD NEW RECORD
         if main_menu_selection == valid_main_menu_options[0]:
@@ -105,8 +114,6 @@ if __name__ == "__main__":
         # SEARCH RECORDS
         elif main_menu_selection == valid_main_menu_options[1]:
             print(search_records_menu.display())
-            search_menu_selection = search_records_menu.get_user_input()
-
             search_results = search_records(book_database, search_records_menu)
 
             if "No results found" in search_results:
@@ -115,32 +122,16 @@ if __name__ == "__main__":
                 continue
 
             # PROMPT FOR WEB VIEW
-            print("View results in a web browser?")
-            print("Type 'yes' or 'no' and press ENTER to select an option.")
-            while True:
-                try:
-                    browser_view_input = input("Your input: ").upper()
-                    if (
-                        re.match("^([yY][eE][sS])|([nN][oO])$", browser_view_input)
-                        is None
-                    ):
-                        raise ValueError
-                except ValueError:
-                    print("Only 'yes' or 'no' are accepted")
-                    continue
-                else:
-                    break
+            viewport_selction = prompt_for_viewport()
 
             # VIEW RESULTS IN CONSOLE
-            if browser_view_input == "NO":
-                print("Displaying records...")
-                print("Book ID | Title | Author Name | Date Completed")
-                print(search_results)
+            if viewport_selction == "NO":
+                view_in_console(search_results)
                 continue_to_main_menu()
                 continue
 
             # VIEW RESULTS IN BROWSER
-            if browser_view_input == "YES":
+            if viewport_selction == "YES":
                 # TO DO
                 # [x] cast search_results to JSON
                 # [ ] recieve response from partner's microservice
@@ -149,6 +140,7 @@ if __name__ == "__main__":
 
                 # Microservice communication files
                 # Waiting for partner to finish microservice
+                # to determine which files are to be used
                 path_to_txt_file = "microservice/books.txt"
                 path_to_json_file = "microservice/request.json"
                 path_to_html_file = "microservice/results.html"
@@ -184,6 +176,7 @@ if __name__ == "__main__":
                     continue_to_main_menu()
                     continue
 
+                # check if microservice generated HTML file.
                 print("Waiting for response from microservice...")
                 while True:
                     time.sleep(1)
@@ -193,14 +186,15 @@ if __name__ == "__main__":
                                 response.readline()
                             except OSError as error:
                                 print(f"Recieve Response: {error}")
+                                continue
                     except PermissionError as error:
                         print(f"Receive Response: {error}")
+                        continue
                     except FileNotFoundError:
                         print("The microservice failed to respond.")
                         continue
                     else:
                         break
-                # webbrowser.open(path_to_html_file)
                 webbrowser.open("file://" + os.path.realpath(path_to_html_file))
                 continue_to_main_menu()
                 continue
@@ -208,37 +202,17 @@ if __name__ == "__main__":
         # VIEW ALL RECORDS
         elif main_menu_selection == valid_main_menu_options[2]:
 
-            # PROMPT FOR WEB VIEW
-            print("View results in a web browser?")
-            print("Type 'yes' or 'no' and press ENTER to select an option.")
-            while True:
-                try:
-                    browser_view_input = input("Your input: ").upper()
-                    if (
-                        re.match("^([Yy][Ee][Ss])|([Nn][Oo])$", browser_view_input)
-                        is None
-                    ):
-                        raise ValueError
-                except ValueError:
-                    print("Only 'yes' or 'no' are accepted")
-                    continue
-                else:
-                    break
+            viewport_selection = prompt_for_viewport()
 
-            # VIEW RESULTS IN CONSOLE
-            if browser_view_input == "NO":
-                print("Displaying records...")
-                print("Book ID | Title | Author Name | Date Completed")
-                print(book_database.view_all_records())
+            if viewport_selection == "NO":
+                view_in_console(book_database.view_all_records())
                 continue_to_main_menu()
                 continue
 
             # VIEW RESULTS IN BROWSER
-            if browser_view_input == "YES":
+            if viewport_selection == "YES":
                 # TO DO
-                # cast search_results to JSON
-                # wait for response from partner's microservice
-                # open generated webpage
+                # see previous menu for more info.
                 webbrowser.open("results.html")
                 continue_to_main_menu()
                 continue
@@ -252,9 +226,8 @@ if __name__ == "__main__":
                 print(search_results)
                 continue_to_main_menu()
                 continue
-            print("Displaying records...")
-            print("Book ID | Title | Author Name | Date Completed")
-            print(search_results)
+
+            view_in_console(search_results)
             book_database.delete_a_record()
             continue_to_main_menu()
             continue
