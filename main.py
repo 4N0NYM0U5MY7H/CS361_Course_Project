@@ -13,7 +13,7 @@ from UserInterace import UserInterface
 from BookLogDB import BookLogDB
 
 
-__version__ = "1.3.1"
+__version__ = "1.3.2"
 
 
 def exit_program():
@@ -62,6 +62,19 @@ def view_in_console(search_results):
 
 def view_results_in_browser():
     pass
+
+
+def write_json_to_file(data, filename):
+    try:
+        with open(filename, "w") as out_file:
+            try:
+                out_file.write(str(data))
+            except OSError as error:
+                print(f"Create JSON: {error}")
+                continue_to_main_menu()
+    except PermissionError as error:
+        print(f"Create JSON: {error}")
+        continue_to_main_menu()
 
 
 if __name__ == "__main__":
@@ -149,18 +162,7 @@ if __name__ == "__main__":
                 json_string = json.dumps(search_results)
 
                 # output json file
-                try:
-                    with open(path_to_json_file, "w") as out_file:
-                        try:
-                            out_file.write(str(json_string))
-                        except OSError as error:
-                            print(f"Create JSON: {error}")
-                            continue_to_main_menu()
-                            continue
-                except PermissionError as error:
-                    print(f"Create JSON: {error}")
-                    continue_to_main_menu()
-                    continue
+                write_json_to_file(json_string, path_to_json_file)
 
                 # Send reponse to txt (current iteration of microservice)
                 try:

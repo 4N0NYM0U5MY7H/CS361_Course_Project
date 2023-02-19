@@ -35,7 +35,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Full support for searching database by date.
 - Renamed UserInterface.get_user_input to get_menu_selection.
 - BookLogDB interface functions are no longer part of the database class (tentative).
-- 
+
+## Removed
+
+- Menu and Menu derived classes from the UserInterface module.
 
 ### Fixed
 
@@ -43,7 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Menu selection is now part of the UserInterface class.
 - Minor corrections to the CHANGELOG.
 - Refactored repeat code in the into functions.
--  
+- Issue with converting some queries to JSON ready dictionary. 
 
 ## [1.0.0] - 2023-01-28
 

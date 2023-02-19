@@ -9,7 +9,7 @@ from contextlib import closing
 r"""The BookDatabase module contains the BookDatabase class and interface functions
 for the CS361 book tracking program."""
 
-__version__ = "1.2.1"
+__version__ = "1.2.2"
 
 # Database interface functions
 def input_book_title():
@@ -170,6 +170,7 @@ class BookLogDB:
     def view_all_records(self):
         """Displays all records in the database."""
         sql_string = """SELECT * FROM books ORDER BY title DESC"""
+        self._previous_query = sql_string
         try:
             with closing(self._create_connection()) as connection:
                 with closing(connection.cursor()) as cursor:
@@ -186,11 +187,13 @@ class BookLogDB:
         """Search for a record by Book Title."""
         book_title = input_book_title()
         sql_string = """SELECT * FROM books WHERE title = ?"""
+        args = (book_title,)
+        self._previous_query = (sql_string, args)
         try:
             with closing(self._create_connection()) as connection:
                 with closing(connection.cursor()) as cursor:
-                    query = cursor.execute(sql_string, (book_title,)).fetchall()
-                    self._previous_query = sql_string, (book_title,)
+                    query = cursor.execute(sql_string, args).fetchall()
+                    # self._previous_query = sql_string, args
                     results = ""
                     if query:
                         for row in query:
@@ -205,11 +208,13 @@ class BookLogDB:
         """Search for a record by Author Name."""
         author_name = input_author_name()
         sql_string = """SELECT * FROM books WHERE author = ?"""
+        args = (author_name,)
+        self._previous_query = (sql_string, args)
         try:
             with closing(self._create_connection()) as connection:
                 with closing(connection.cursor()) as cursor:
-                    query = cursor.execute(sql_string, (author_name,)).fetchall()
-                    self._previous_query = sql_string, (author_name,)
+                    query = cursor.execute(sql_string, args).fetchall()
+                    # self._previous_query = (sql_string, args)
                     results = ""
                     if query:
                         for row in query:
@@ -224,11 +229,13 @@ class BookLogDB:
         """Search for a record by Date it was completed."""
         date_completed = input_date_completed()
         sql_string = """SELECT * FROM books WHERE date = ?"""
+        args = (date_completed,)
+        self._previous_query = (sql_string, args)
         try:
             with closing(self._create_connection()) as connection:
                 with closing(connection.cursor()) as cursor:
-                    query = cursor.execute(sql_string, (date_completed,)).fetchall()
-                    self._previous_query = sql_string, (date_completed,)
+                    query = cursor.execute(sql_string, args).fetchall()
+                    # self._previous_query = sql_string, args)
                     results = ""
                     if query:
                         for row in query:
@@ -246,8 +253,14 @@ class BookLogDB:
                 connection.row_factory = self._dictionary_factory
                 with closing(connection.cursor()):
                     results = []
-                    for row in connection.execute(str(self._previous_query)):
-                        results.append(row)
+                    if type(self._previous_query) is str:
+                        for row in connection.execute(self._previous_query):
+                            results.append(row)
+                    if type(self._previous_query) is tuple:
+                        for row in connection.execute(
+                            str(self._previous_query[0]), self._previous_query[1]
+                        ):
+                            results.append(row)
                     return dict({"books": results})
         except sqlite3.Error as error:
             print(f"generate_json: {error}")
