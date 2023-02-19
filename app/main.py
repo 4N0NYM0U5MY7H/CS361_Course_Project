@@ -19,7 +19,7 @@ from BookDatabase import (
 )
 
 
-__version__ = "1.4.2"
+__version__ = "1.4.3"
 
 
 def exit_program():
@@ -108,9 +108,9 @@ if __name__ == "__main__":
 
     # microservice communication files
     # waiting for partner to complete microservice
-    path_to_txt_file = "data/books.txt"
-    path_to_json_file = "data/request.json"
-    path_to_html_file = "data/response.html"
+    path_to_txt_file = "../data/books.txt"
+    path_to_json_file = "../data/request.json"
+    path_to_html_file = "../data/response.html"
 
     main_menu_options = {
         1: "Add a book to your records",

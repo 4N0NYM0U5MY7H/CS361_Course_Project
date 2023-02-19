@@ -37,6 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Full support for searching database by id
 - Renamed the UserInterface get_user_input method to get_user_selection.
 - BookDatabase interface functions are no longer part of the database class.
+- Repository architecture for organization.
 
 ## Removed
 

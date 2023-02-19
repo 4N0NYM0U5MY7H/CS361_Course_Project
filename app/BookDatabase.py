@@ -9,7 +9,7 @@ from contextlib import closing
 r"""The BookDatabase module contains the BookDatabase class and interface functions
 for the CS361 book tracking program."""
 
-__version__ = "2.0.0"
+__version__ = "2.0.1"
 
 # --------------------------------------------------------------------
 # Public database interface functions
@@ -86,7 +86,7 @@ class BookDatabase:
         return cls.instance
 
     def __init__(self):
-        self._sqlite_file = "data/book_log.db"
+        self._sqlite_file = "../data/book_log.db"
         self._connection = self._create_connection()
         self._create_table()
         self._previous_query = None
