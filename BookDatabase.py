@@ -9,10 +9,11 @@ from contextlib import closing
 r"""The BookDatabase module contains the BookDatabase class and interface functions
 for the CS361 book tracking program."""
 
-__version__ = "1.2.2"
+__version__ = "2.0.0"
 
-# Database interface functions
-def input_book_title():
+# --------------------------------------------------------------------
+# Public database interface functions
+def enter_book_title():
     while True:
         print(
             "Enter a Book Title.\n"
@@ -25,7 +26,7 @@ def input_book_title():
                 return book_title
 
 
-def input_author_name():
+def enter_author_name():
     while True:
         print(
             "Enter an Author's name.\n"
@@ -38,7 +39,7 @@ def input_author_name():
                 return author_name
 
 
-def input_date_completed():
+def enter_date_completed():
     while True:
         print(
             "Enter a date the book was completed.\n"
@@ -49,7 +50,7 @@ def input_date_completed():
             return date_completed
 
 
-def input_book_id():
+def enter_book_id():
     print("Enter a Book ID to delete.")
     print("Input a number and press ENTER to select an option.")
     while True:
@@ -63,14 +64,16 @@ def input_book_id():
             return user_input
 
 
-def return_query(query):
+# --------------------------------------------------------------------
+# Private database interface functions
+def _return_query_by_row(query):
     results = ""
     for row in query:
         results += f"{row}\n"
     return results
 
 
-class BookLogDB:
+class BookDatabase:
     """Represents a database with CRUD opertaions for the CS361 book tracking program."""
 
     instance = None
@@ -78,15 +81,25 @@ class BookLogDB:
     def __new__(cls, *args, **kwargs):
         """Implement the singleton design pattern."""
         if cls.instance is None:
-            cls.instance = super().__new__(BookLogDB)
+            cls.instance = super().__new__(BookDatabase)
             return cls.instance
         return cls.instance
 
     def __init__(self):
-        self._sqlite_file = "book_log.db"
+        self._sqlite_file = "data/book_log.db"
         self._connection = self._create_connection()
         self._create_table()
         self._previous_query = None
+        self._queries = {
+            "id": "SELECT * FROM books WHERE book_id = ?",
+            "title": "SELECT * FROM books WHERE title = ?",
+            "author": "SELECT * FROM books WHERE author = ?",
+            "date": "SELECT * FROM books WHERE date = ?",
+            "view all": "SELECT * FROM books ORDER BY book_id",
+            "add new": "INSERT INTO books(title, author, date) VALUES (?,?,?)",
+            "delete by id": "DELETE FROM books WHERE book_id = ?",
+            "update": "",
+        }
 
     def __del__(self):
         try:
@@ -119,34 +132,34 @@ class BookLogDB:
         except sqlite3.Error as error:
             print(f"create_table: {error}")
 
-    def add_new_record(self):
-        book_title = input_book_title()
-        author_name = input_author_name()
-        date_completed = input_date_completed()
-        sql_string = """INSERT INTO books(title, author, date)
-                        VALUES (?,?,?)"""
+    def _get_query_key(self, n=0):
+        if n < 0:
+            n += len(self._queries)
+        for i, key in enumerate(self._queries.keys()):
+            if i == n:
+                return key
+        raise IndexError("dictionary index out of range.")
+
+    def add_new_entry(self, args):
+        sql_string = self._queries["add new"]
         try:
             with closing(self._create_connection()) as connection:
                 with closing(connection.cursor()) as cursor:
-                    cursor.execute(
-                        sql_string, (book_title, author_name, date_completed)
-                    )
+                    cursor.execute(sql_string, args)
                 connection.commit()
-            success_string = (
-                f"{book_title} by {author_name} completed on {date_completed}."
-            )
+            success_string = f"{args[0]} by {args[1]} completed on {args[2]}."
             print(f"Book successfully added!\n{success_string}")
         except sqlite3.Error as error:
-            print(f"add_new_record: {error}")
+            print(f"add_new_entry: {error}")
 
-    def delete_a_record(self):
-        id = input_book_id()
-        sql_select_string = """SELECT * FROM books WHERE book_id = ?"""
-        sql_delete_string = """DELETE FROM books WHERE book_id = ?"""
+    def delete_by_id(self, id):
+        sql_select_string = self._queries["id"]
+        sql_delete_string = self._queries["delete by id"]
+        args = (id,)
         try:
             with closing(self._create_connection()) as connection:
                 with closing(connection.cursor()) as cursor:
-                    query = cursor.execute(sql_select_string, (id,))
+                    query = cursor.execute(sql_select_string, args)
                     query_string = query.fetchone()
                     if query_string:
                         print("Are you sure you want to delete this from your records?")
@@ -155,96 +168,48 @@ class BookLogDB:
                             print("Type 'yes' to continue or press ENTER to cancel.")
                             continue_prompt = input("Your input: ")
                             if continue_prompt.lower() == "yes":
-                                cursor.execute(sql_delete_string, (id,))
+                                cursor.execute(sql_delete_string, args)
                                 print("Book successfully deleted!")
                                 connection.commit()
-                                break
+                                return
                             else:
-                                print("Canceling delete Request.")
-                                break
+                                print("Canceling delete request.")
+                                return
                     else:
                         print(f"No records found with Book ID {id}.")
         except sqlite3.Error as error:
-            print(f"delete_a_record: {error}")
+            print(f"delete_entry_by_id: {error}")
 
-    def view_all_records(self):
-        """Displays all records in the database."""
+    def view_all_entries(self):
         sql_string = """SELECT * FROM books ORDER BY title DESC"""
         self._previous_query = sql_string
         try:
             with closing(self._create_connection()) as connection:
                 with closing(connection.cursor()) as cursor:
                     query = cursor.execute(sql_string).fetchall()
-                    self._previous_query = sql_string
                     results = ""
                     for row in query:
                         results += f"{row}\n"
             return results
         except sqlite3.Error as error:
-            print(f"view_all_records: {error}")
+            print(f"view_all_entries: {error}")
 
-    def search_by_title(self):
-        """Search for a record by Book Title."""
-        book_title = input_book_title()
-        sql_string = """SELECT * FROM books WHERE title = ?"""
-        args = (book_title,)
+    def search(self, key, value):
+        sql_string = self._queries[self._get_query_key(key)]
+        args = (value,)
         self._previous_query = (sql_string, args)
         try:
             with closing(self._create_connection()) as connection:
                 with closing(connection.cursor()) as cursor:
                     query = cursor.execute(sql_string, args).fetchall()
-                    # self._previous_query = sql_string, args
-                    results = ""
                     if query:
-                        for row in query:
-                            results += f"{row}\n"
-                        return results
+                        return _return_query_by_row(query)
                     else:
-                        return f"No results found with the Book Title {book_title}"
+                        return (
+                            f"No results found with {self._get_query_key(key)} {value}"
+                        )
         except sqlite3.Error as error:
-            print(f"search_by_title: {error}")
-
-    def search_by_author(self):
-        """Search for a record by Author Name."""
-        author_name = input_author_name()
-        sql_string = """SELECT * FROM books WHERE author = ?"""
-        args = (author_name,)
-        self._previous_query = (sql_string, args)
-        try:
-            with closing(self._create_connection()) as connection:
-                with closing(connection.cursor()) as cursor:
-                    query = cursor.execute(sql_string, args).fetchall()
-                    # self._previous_query = (sql_string, args)
-                    results = ""
-                    if query:
-                        for row in query:
-                            results += f"{row}\n"
-                        return results
-                    else:
-                        return f"No results found with the Author Name {author_name}"
-        except sqlite3.Error as error:
-            print(f"search_by_author: {error}")
-
-    def search_by_date(self):
-        """Search for a record by Date it was completed."""
-        date_completed = input_date_completed()
-        sql_string = """SELECT * FROM books WHERE date = ?"""
-        args = (date_completed,)
-        self._previous_query = (sql_string, args)
-        try:
-            with closing(self._create_connection()) as connection:
-                with closing(connection.cursor()) as cursor:
-                    query = cursor.execute(sql_string, args).fetchall()
-                    # self._previous_query = sql_string, args)
-                    results = ""
-                    if query:
-                        for row in query:
-                            results += f"{row}\n"
-                        return results
-                    else:
-                        return f"No results found with the Completion Date {date_completed}"
-        except sqlite3.Error as error:
-            print(f"search_by_date: {error}")
+            print(f"search: {error}")
 
     def generate_json_data(self):
         """Returns search reslts in a JSON ready dictionary."""
