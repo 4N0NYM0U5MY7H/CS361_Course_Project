@@ -10,10 +10,16 @@ import time
 import json
 import webbrowser
 from UserInterace import UserInterface
-from BookLogDB import BookLogDB
+from BookDatabase import (
+    BookDatabase,
+    enter_book_id,
+    enter_book_title,
+    enter_author_name,
+    enter_date_completed,
+)
 
 
-__version__ = "1.3.2"
+__version__ = "1.4.2"
 
 
 def exit_program():
@@ -25,18 +31,18 @@ def continue_to_main_menu():
     print("Returning to Main Menu...")
 
 
-def search_records(database=BookLogDB, menu=UserInterface):
-    valid_search_options = list(menu.get_options())
-    search_selection = menu.get_menu_selection()
+def search_records(database=BookDatabase, menu=UserInterface):
+    valid_options = list(menu.get_options())
+    selection = menu.get_menu_selection()
 
-    if search_selection == valid_search_options[0]:
-        return database.search_by_title()
-    elif search_selection == valid_search_options[1]:
-        return database.search_by_author()
-    elif search_selection == valid_search_options[2]:
-        return database.search_by_date()
-    elif search_selection == valid_search_options[3]:
-        return database.view_all_records()
+    if selection == valid_options[0]:
+        return database.search(selection, enter_book_title())
+    elif selection == valid_options[1]:
+        return database.search(selection, enter_author_name())
+    elif selection == valid_options[2]:
+        return database.search(selection, enter_date_completed())
+    elif selection == valid_options[3]:
+        return database.view_all_entries()
 
 
 def prompt_for_viewport():
@@ -60,20 +66,37 @@ def view_in_console(search_results):
     print(search_results)
 
 
-def view_results_in_browser():
-    pass
+def wait_for_microservice_response(filename):
+    print("Waiting for response from microservice...")
+    while True:
+        time.sleep(1)
+        try:
+            with open(filename, "r") as response:
+                try:
+                    response.readline()
+                except OSError as error:
+                    print(f"Recieve Response: {error}")
+                    continue
+        except PermissionError as error:
+            print(f"Receive Response: {error}")
+            continue
+        except FileNotFoundError:
+            print("The microservice failed to respond.")
+            continue
+        else:
+            break
 
 
-def write_json_to_file(data, filename):
+def send_microservice_request(data, filename):
     try:
         with open(filename, "w") as out_file:
             try:
                 out_file.write(str(data))
             except OSError as error:
-                print(f"Create JSON: {error}")
+                print(f"send_microservice: {error}")
                 continue_to_main_menu()
     except PermissionError as error:
-        print(f"Create JSON: {error}")
+        print(f"send_microservice: {error}")
         continue_to_main_menu()
 
 
@@ -81,7 +104,13 @@ if __name__ == "__main__":
 
     program_title = "CS361 Book Log"
     program_subtitle = "Tracking your reading since 2023"
-    book_database = BookLogDB()
+    book_database = BookDatabase()
+
+    # microservice communication files
+    # waiting for partner to complete microservice
+    path_to_txt_file = "data/books.txt"
+    path_to_json_file = "data/request.json"
+    path_to_html_file = "data/response.html"
 
     main_menu_options = {
         1: "Add a book to your records",
@@ -120,7 +149,12 @@ if __name__ == "__main__":
         # ADD NEW RECORD
         if main_menu_selection == valid_main_menu_options[0]:
             print(add_record_menu.display())
-            book_database.add_new_record()
+            book_data = (
+                enter_book_title(),
+                enter_author_name(),
+                enter_date_completed(),
+            )
+            book_database.add_new_entry(book_data)
             continue_to_main_menu()
             continue
 
@@ -134,10 +168,8 @@ if __name__ == "__main__":
                 continue_to_main_menu()
                 continue
 
-            # PROMPT FOR WEB VIEW
             viewport_selction = prompt_for_viewport()
 
-            # VIEW RESULTS IN CONSOLE
             if viewport_selction == "NO":
                 view_in_console(search_results)
                 continue_to_main_menu()
@@ -145,58 +177,18 @@ if __name__ == "__main__":
 
             # VIEW RESULTS IN BROWSER
             if viewport_selction == "YES":
-                # TO DO
-                # [x] cast search_results to JSON
-                # [ ] recieve response from partner's microservice
-                # [x] open generated webpage
-                # [ ] code clean-up
-
-                # Microservice communication files
-                # Waiting for partner to finish microservice
-                # to determine which files are to be used
-                path_to_txt_file = "microservice/books.txt"
-                path_to_json_file = "microservice/request.json"
-                path_to_html_file = "microservice/results.html"
-
                 search_results = book_database.generate_json_data()
+
+                # waiting for partner to complete microservice
+                # search_results.update({"status": "request"})
+
                 json_string = json.dumps(search_results)
+                send_microservice_request(json_string, path_to_json_file)
 
-                # output json file
-                write_json_to_file(json_string, path_to_json_file)
+                # waiting for partner to complete microservice
+                # send_microservice_request("request", path_to_txt_file)
 
-                # Send reponse to txt (current iteration of microservice)
-                try:
-                    with open(path_to_txt_file, "w") as out_file:
-                        try:
-                            out_file.write("request")
-                        except OSError as error:
-                            print(f"Send Request: {error}")
-                            continue_to_main_menu()
-                            continue
-                except PermissionError as error:
-                    print(f"Send Request: {error}")
-                    continue_to_main_menu()
-                    continue
-
-                # check if microservice generated HTML file.
-                print("Waiting for response from microservice...")
-                while True:
-                    time.sleep(1)
-                    try:
-                        with open(path_to_html_file, "r") as response:
-                            try:
-                                response.readline()
-                            except OSError as error:
-                                print(f"Recieve Response: {error}")
-                                continue
-                    except PermissionError as error:
-                        print(f"Receive Response: {error}")
-                        continue
-                    except FileNotFoundError:
-                        print("The microservice failed to respond.")
-                        continue
-                    else:
-                        break
+                wait_for_microservice_response(path_to_html_file)
                 webbrowser.open("file://" + os.path.realpath(path_to_html_file))
                 continue_to_main_menu()
                 continue
@@ -207,15 +199,26 @@ if __name__ == "__main__":
             viewport_selection = prompt_for_viewport()
 
             if viewport_selection == "NO":
-                view_in_console(book_database.view_all_records())
+                view_in_console(book_database.view_all_entries())
                 continue_to_main_menu()
                 continue
 
             # VIEW RESULTS IN BROWSER
             if viewport_selection == "YES":
-                # TO DO
-                # see previous menu for more info.
-                webbrowser.open("results.html")
+                book_database.view_all_entries()
+                search_results = book_database.generate_json_data()
+
+                # waiting for partner to complete microservice
+                # search_results.update({"status": "request"})
+
+                json_string = json.dumps(search_results)
+                send_microservice_request(json_string, path_to_json_file)
+
+                # waiting for partner to complete microservice
+                # send_microservice_request("request", path_to_txt_file)
+
+                wait_for_microservice_response(path_to_html_file)
+                webbrowser.open("file://" + os.path.realpath(path_to_html_file))
                 continue_to_main_menu()
                 continue
 
@@ -230,7 +233,7 @@ if __name__ == "__main__":
                 continue
 
             view_in_console(search_results)
-            book_database.delete_a_record()
+            book_database.delete_by_id(enter_book_id())
             continue_to_main_menu()
             continue
 
