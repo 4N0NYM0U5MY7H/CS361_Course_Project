@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
-- Sort search search results.
+- Sort search results.
 - Update items in a database.
 - Merge duplicate items in a database.
 - Save a backup of the database.
@@ -21,32 +21,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - .gitattributes
 - CHANGELOG.md
+- BookDatabase.py
 - Support for writing JSON files.
-- Support for opening HTML files.
-- BookLogDB can now output query results as a dictionary.
-- 
+- Support for opening HTML files in a web browser.
+- BookDatabase can now output query results as a dictionary.
 
 ### Changed
 
 - Replaced the Menu classes with a single UserInterface class.
+- Replaced the BookLogDB class with BookDatabase class.
 - Updated the project README.
-- Full support for searching the database by author.
-- Full support for searching the database by title.
+- Full support for searching database by author.
+- Full support for searching database by title.
 - Full support for searching database by date.
-- Renamed UserInterface.get_user_input to get_menu_selection.
-- BookLogDB interface functions are no longer part of the database class (tentative).
+- Full support for searching database by id
+- Renamed the UserInterface get_user_input method to get_user_selection.
+- BookDatabase interface functions are no longer part of the database class.
 
 ## Removed
 
 - Menu and Menu derived classes from the UserInterface module.
+- BookLogDB.py
 
 ### Fixed
 
-- BookLogDB connection method is now a private method.
+- BookDatabase connection method is now a private method.
 - Menu selection is now part of the UserInterface class.
 - Minor corrections to the CHANGELOG.
 - Refactored repeat code in the into functions.
-- Issue with converting some queries to JSON ready dictionary. 
+- Issue with converting some queries to JSON ready dictionary.
 
 ## [1.0.0] - 2023-01-28
 
