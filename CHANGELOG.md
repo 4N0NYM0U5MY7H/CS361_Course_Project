@@ -12,8 +12,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Merge duplicate items in a database.
 - Save a backup of the database.
 - Load a backup of the database.
-- Microservice integration to convert JSON data to an HTML document.
-- View search results in a web browser.
 
 ## [2.0.0] - 2023-02-27 (expected)
 
@@ -22,9 +20,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - .gitattributes
 - CHANGELOG.md
 - BookDatabase.py
+- utility.py
+- Pipfile
 - Support for writing JSON files.
 - Support for opening HTML files in a web browser.
 - BookDatabase can now output query results as a dictionary.
+- Microservice integration to convert JSON data to an HTML document.
+- View search results in a web browser.
+- MicroserviceException class in case the microservice fails to respond.
+- BookDatabase now creates a new database file if one does not exist.
 
 ### Changed
 
@@ -38,6 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Renamed the UserInterface get_user_input method to get_user_selection.
 - BookDatabase interface functions are no longer part of the database class.
 - Repository architecture for organization.
+- Moved various utility functions into their own module.
 
 ## Removed
 
