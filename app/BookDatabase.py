@@ -9,7 +9,7 @@ from contextlib import closing
 r"""The BookDatabase module contains the BookDatabase class and interface functions
 for the CS361 book tracking program."""
 
-__version__ = "2.0.1"
+__version__ = "2.1.0"
 
 # --------------------------------------------------------------------
 # Public database interface functions
@@ -73,6 +73,15 @@ def _return_query_by_row(query):
     return results
 
 
+def _create_database(filename):
+    try:
+        with open(filename, "r"):
+            pass
+    except FileNotFoundError:
+        with open(filename, "w"):
+            pass
+
+
 class BookDatabase:
     """Represents a database with CRUD opertaions for the CS361 book tracking program."""
 
@@ -86,7 +95,8 @@ class BookDatabase:
         return cls.instance
 
     def __init__(self):
-        self._sqlite_file = "../data/book_log.db"
+        self._sqlite_file = "data/books.db"
+        _create_database(self._sqlite_file)
         self._connection = self._create_connection()
         self._create_table()
         self._previous_query = None
@@ -103,7 +113,7 @@ class BookDatabase:
 
     def __del__(self):
         try:
-            self._connection.close()
+            self._create_connection().close()
         except sqlite3.Error as error:
             print(f"__del__: {error}")
 
@@ -126,7 +136,7 @@ class BookDatabase:
                         author VARCHAR(100) NOT NULL,
                         date VARCHAR(10))"""
         try:
-            with closing(self._connection) as connection:
+            with closing(self._create_connection()) as connection:
                 with closing(connection.cursor()) as cursor:
                     cursor.execute(sql_string)
         except sqlite3.Error as error:
