@@ -3,10 +3,10 @@ import re
 import time
 
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
 # --------------------------------------------------------------------
-# Menu interface
+# Menu interface utility functions
 def exit_program():
     return sys.exit()
 
@@ -38,25 +38,37 @@ def view_in_console(search_results):
 
 
 # --------------------------------------------------------------------
-# Microservice interface
+# Microservice interface utility functions
+class MicroserviceException(Exception):
+    def __init__(self):
+        self._message("The microservice failed to respond.")
+
+    def __str__(self):
+        return repr(self._message)
+
+
 def wait_for_microservice_response(filename):
     print("Waiting for response from microservice...")
-    while True:
+    max_attempts = 30
+    attempt = 0
+    while attempt < max_attempts:
         time.sleep(1)
         try:
             with open(filename, "r") as response:
                 try:
                     response.readline()
                 except OSError as error:
-                    print(f"Recieve Response: {error}")
+                    attempt += 1
                     continue
         except PermissionError as error:
-            print(f"Receive Response: {error}")
-            continue
+            print(f"wait_for_microservice_response: {error}")
+            return
         except FileNotFoundError:
-            print("The microservice failed to respond.")
+            attempt += 1
             continue
         else:
+            if attempt == max_attempts:
+                raise MicroserviceException
             break
 
 
