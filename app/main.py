@@ -1,7 +1,7 @@
 # Author: August Frisk
 # GitHub username: @4N0NYM0U5MY7H
-# Date: 2023, February 24
-# Description: The main driver program for the CS 361 Book Log program.
+# Date: 2023, February 26
+# Description: The main program for the CS 361 book tracking project.
 
 import os
 import time
@@ -26,7 +26,7 @@ from utility import (
 )
 
 
-__version__ = "1.4.4"
+__version__ = "1.4.5"
 
 
 def search_records(database=BookDatabase, menu=UserInterface):
@@ -45,7 +45,16 @@ def search_records(database=BookDatabase, menu=UserInterface):
 
 if __name__ == "__main__":
 
-    program_title = "CS361 Book Log"
+    program_title = """
+ /$$                           /$$       /$$             /$$    
+| $$                          | $$      | $$            | $$    
+| $$$$$$$   /$$$$$$   /$$$$$$ | $$   /$$| $$  /$$$$$$  /$$$$$$  
+| $$__  $$ /$$__  $$ /$$__  $$| $$  /$$/| $$ /$$__  $$|_  $$_/  
+| $$  \ $$| $$  \ $$| $$  \ $$| $$$$$$/ | $$| $$$$$$$$  | $$    
+| $$  | $$| $$  | $$| $$  | $$| $$_  $$ | $$| $$_____/  | $$ /$$
+| $$$$$$$/|  $$$$$$/|  $$$$$$/| $$ \  $$| $$|  $$$$$$$  |  $$$$/
+|_______/  \______/  \______/ |__/  \__/|__/ \_______/   \___/
+"""
     program_subtitle = "Tracking your reading since 2023"
 
     os.makedirs("data/", exist_ok=True)
@@ -79,7 +88,7 @@ if __name__ == "__main__":
     search_records_menu = UserInterface("Search Records", search_records_menu_options)
     remove_record_menu = UserInterface("Remove Record", search_records_menu_options)
 
-    print(f"Welcome to the {program_title}!\n{program_subtitle}.")
+    print(f"{program_title}\n{program_subtitle}.")
     time.sleep(2)
 
     valid_main_menu_options = list(main_menu.get_options())
