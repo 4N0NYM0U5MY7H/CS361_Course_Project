@@ -1,15 +1,13 @@
-# Author: August Frisk
-# GitHub username: @4N0NYM0U5MY7H
-# Date: 2023, February 18
-
-import re
-import sqlite3
-from contextlib import closing
-
 r"""The BookDatabase module contains the BookDatabase class and interface functions
 for the CS361 book tracking program."""
 
-__version__ = "2.1.0"
+import re
+import sqlite3
+import shutil
+from contextlib import closing
+
+__version__ = "2.2.4"
+__author__ = "August Frisk <https://github.com/users/4N0NYM0U5MY7H>"
 
 # --------------------------------------------------------------------
 # Public database interface functions
@@ -94,8 +92,8 @@ class BookDatabase:
             return cls.instance
         return cls.instance
 
-    def __init__(self):
-        self._sqlite_file = "data/books.db"
+    def __init__(self, filename):
+        self._sqlite_file = filename
         _create_database(self._sqlite_file)
         self._connection = self._create_connection()
         self._create_table()
@@ -150,6 +148,15 @@ class BookDatabase:
                 return key
         raise IndexError("dictionary index out of range.")
 
+    def _set_sqlite_file(self, filename):
+        self._sqlite_file = filename
+
+    def save_backup(self, filename):
+        shutil.copy2(self._sqlite_file, filename)
+
+    def load_backup(self, filename):
+        self._set_sqlite_file(filename)
+
     def add_new_entry(self, args):
         sql_string = self._queries["add new"]
         try:
@@ -175,15 +182,15 @@ class BookDatabase:
                         print("Are you sure you want to delete this from your records?")
                         print(query_string)
                         while True:
-                            print("Type 'yes' to continue or press ENTER to cancel.")
+                            print("Type 'YES' to continue or press ENTER to cancel.")
                             continue_prompt = input("Your input: ")
-                            if continue_prompt.lower() == "yes":
+                            if continue_prompt.upper() == "YES":
                                 cursor.execute(sql_delete_string, args)
                                 print("Book successfully deleted!")
                                 connection.commit()
                                 return
                             else:
-                                print("Canceling delete request.")
+                                print("Canceling delete request...")
                                 return
                     else:
                         print(f"No records found with Book ID {id}.")
@@ -212,12 +219,11 @@ class BookDatabase:
             with closing(self._create_connection()) as connection:
                 with closing(connection.cursor()) as cursor:
                     query = cursor.execute(sql_string, args).fetchall()
-                    if query:
-                        return _return_query_by_row(query)
-                    else:
-                        return (
-                            f"No results found with {self._get_query_key(key)} {value}"
-                        )
+                    return (
+                        _return_query_by_row(query)
+                        if query
+                        else f"No results found with {self._get_query_key(key)} {value}"
+                    )
         except sqlite3.Error as error:
             print(f"search: {error}")
 
