@@ -1,13 +1,8 @@
-# Author: August Frisk
-# GitHub username: @4N0NYM0U5MY7H
-# Date: 2023, February 26
-# Description: The main program for the CS 361 book tracking project.
-
 import os
 import time
 import json
 import webbrowser
-from UserInterace import UserInterface
+from Menu import Menu
 from BookDatabase import (
     BookDatabase,
     enter_book_id,
@@ -25,11 +20,11 @@ from utility import (
     write_to_file,
 )
 
+__version__ = "1.4.9"
+__author__ = "August Frisk <https://github.com/users/4N0NYM0U5MY7H>"
 
-__version__ = "1.4.5"
 
-
-def search_records(database=BookDatabase, menu=UserInterface):
+def search_records(database=BookDatabase, menu=Menu):
     valid_options = list(menu.get_options())
     selection = menu.get_menu_selection()
 
@@ -57,36 +52,37 @@ if __name__ == "__main__":
 """
     program_subtitle = "Tracking your reading since 2023"
 
-    os.makedirs("data/", exist_ok=True)
-    path_to_txt_file = "data/request.txt"
-    path_to_json_file = "data/books.json"
-    path_to_html_file = "data/response.html"
-    book_database = BookDatabase()
+    os.makedirs("../data/", exist_ok=True)
+    path_to_txt_file = "../data/request.txt"
+    path_to_json_file = "../data/books.json"
+    path_to_html_file = "../data/response.html"
+    path_to_db_file = "../data/books.db"
+    book_database = BookDatabase(path_to_db_file)
 
     main_menu_options = {
-        1: "Add a book to your records",
-        2: "Search for a book",
-        3: "View all books in your records",
-        4: "Remove a book from your records",
-        5: "Exit Program",
+        1: "ADD a book to your records",
+        2: "SEARCH for a book",
+        3: "VIEW ALL books in your records",
+        4: "REMOVE a book from your records",
+        5: "EXIT Program",
     }
-    main_menu = UserInterface("Main Menu", main_menu_options)
+    main_menu = Menu("Main Menu", main_menu_options)
 
     add_record_menu_options = {
         "Book Title": "Title of the book",
         "Author Name": "First and last name of the author",
         "Date Completed": "Date the book was completed",
     }
-    add_record_menu = UserInterface("Add Record", add_record_menu_options)
+    add_record_menu = Menu("Add Record", add_record_menu_options)
 
     search_records_menu_options = {
-        1: "Search by title of the book",
-        2: "Search by author's name",
-        3: "Search by date the book was completed",
-        4: "View all entries",
+        1: "Search by TITLE of the book",
+        2: "Search by AUTHOR's name",
+        3: "Search by DATE the book was completed",
+        4: "VIEW ALL entries",
     }
-    search_records_menu = UserInterface("Search Records", search_records_menu_options)
-    remove_record_menu = UserInterface("Remove Record", search_records_menu_options)
+    search_records_menu = Menu("Search Records", search_records_menu_options)
+    remove_record_menu = Menu("Remove Record", search_records_menu_options)
 
     print(f"{program_title}\n{program_subtitle}.")
     time.sleep(2)
