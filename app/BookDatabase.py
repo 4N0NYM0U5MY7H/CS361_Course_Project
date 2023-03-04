@@ -6,7 +6,7 @@ import sqlite3
 import shutil
 from contextlib import closing
 
-__version__ = "2.2.4"
+__version__ = "2.3.0"
 __author__ = "August Frisk <https://github.com/users/4N0NYM0U5MY7H>"
 
 # --------------------------------------------------------------------
@@ -60,6 +60,19 @@ def enter_book_id():
             continue
         else:
             return user_input
+
+
+def enter_filename():
+    while True:
+        print(
+            "Enter a file name.\n"
+            + "Must only use A(a)-Z(z).\n"
+            + "Must be less than 25 characters."
+        )
+        filename = input("File Name: ")
+        if re.search("^[a-zA-Z]+$", filename):
+            if len(filename) < 26:
+                return filename
 
 
 # --------------------------------------------------------------------

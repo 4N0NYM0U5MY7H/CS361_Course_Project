@@ -9,6 +9,7 @@ from BookDatabase import (
     enter_book_title,
     enter_author_name,
     enter_date_completed,
+    enter_filename,
 )
 from utility import (
     exit_program,
@@ -20,7 +21,7 @@ from utility import (
     write_to_file,
 )
 
-__version__ = "1.4.9"
+__version__ = "1.5.4"
 __author__ = "August Frisk <https://github.com/users/4N0NYM0U5MY7H>"
 
 
@@ -38,6 +39,16 @@ def search_records(database=BookDatabase, menu=Menu):
         return database.view_all_entries()
 
 
+def backup_options(direrctory, database=BookDatabase, menu=Menu):
+    valid_options = list(menu.get_options())
+    selection = menu.get_menu_selection()
+
+    if selection == valid_options[0]:
+        return database.save_backup(f"{direrctory}/{enter_filename()}.db")
+    elif selection == valid_options[1]:
+        return database.load_backup(f"{direrctory}/{enter_filename()}.db")
+
+
 if __name__ == "__main__":
 
     program_title = """
@@ -52,19 +63,28 @@ if __name__ == "__main__":
 """
     program_subtitle = "Tracking your reading since 2023"
 
-    os.makedirs("../data/", exist_ok=True)
-    path_to_txt_file = "../data/request.txt"
-    path_to_json_file = "../data/books.json"
-    path_to_html_file = "../data/response.html"
-    path_to_db_file = "../data/books.db"
+    data_directory = "../data"
+    os.makedirs(data_directory, exist_ok=True)
+
+    microservice_request_file = "request.txt"
+    microservice_request_data_file = "books.json"
+    microservice_response_file = "response.html"
+    database_file = "books.db"
+
+    path_to_txt_file = f"{data_directory}/{microservice_request_file}"
+    path_to_json_file = f"{data_directory}/{microservice_request_data_file}"
+    path_to_html_file = f"{data_directory}/{microservice_response_file}"
+    path_to_db_file = f"{data_directory}/{database_file}"
+
     book_database = BookDatabase(path_to_db_file)
 
     main_menu_options = {
-        1: "ADD a book to your records",
-        2: "SEARCH for a book",
-        3: "VIEW ALL books in your records",
-        4: "REMOVE a book from your records",
-        5: "EXIT Program",
+        1: "ADD a book to your collection",
+        2: "SEARCH your books",
+        3: "VIEW ALL of your books",
+        4: "REMOVE a book from your collection",
+        5: "BACKUP options",
+        6: "EXIT Program",
     }
     main_menu = Menu("Main Menu", main_menu_options)
 
@@ -83,6 +103,12 @@ if __name__ == "__main__":
     }
     search_records_menu = Menu("Search Records", search_records_menu_options)
     remove_record_menu = Menu("Remove Record", search_records_menu_options)
+
+    backup_menu_options = {
+        1: "SAVE a backup of your collection",
+        2: "LOAD a backup of your collection",
+    }
+    backup_menu = Menu("Backup Options", backup_menu_options)
 
     print(f"{program_title}\n{program_subtitle}.")
     time.sleep(2)
@@ -129,6 +155,7 @@ if __name__ == "__main__":
                 json_string = json.dumps(search_results)
                 write_to_file(json_string, path_to_json_file)
                 write_to_file("request", path_to_txt_file)
+
                 try:
                     wait_for_microservice_response(path_to_html_file)
                 except MicroserviceException as error:
@@ -158,6 +185,7 @@ if __name__ == "__main__":
                 json_string = json.dumps(search_results)
                 write_to_file(json_string, path_to_json_file)
                 write_to_file("request", path_to_txt_file)
+
                 try:
                     wait_for_microservice_response(path_to_html_file)
                 except MicroserviceException as error:
@@ -181,6 +209,13 @@ if __name__ == "__main__":
 
             view_in_console(search_results)
             book_database.delete_by_id(enter_book_id())
+            continue_to_main_menu()
+            continue
+
+        # BACKUP OPTIONS
+        elif main_menu_selection == valid_main_menu_options[4]:
+            print(backup_menu.display())
+            backup_options(data_directory, book_database, backup_menu)
             continue_to_main_menu()
             continue
 
