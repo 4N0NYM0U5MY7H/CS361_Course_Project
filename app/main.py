@@ -25,10 +25,7 @@ __version__ = "1.5.5"
 __author__ = "August Frisk <https://github.com/users/4N0NYM0U5MY7H>"
 
 
-def search_records(database=BookDatabase, menu=Menu):
-    valid_options = list(menu.get_options())
-    selection = menu.get_menu_selection()
-
+def search_records(selection, database=BookDatabase):
     if selection == valid_options[0]:
         return database.search(selection, enter_book_title())
     elif selection == valid_options[1]:
@@ -39,10 +36,7 @@ def search_records(database=BookDatabase, menu=Menu):
         return database.view_all_entries()
 
 
-def backup_options(directory, database=BookDatabase, menu=Menu):
-    valid_options = list(menu.get_options())
-    selection = menu.get_menu_selection()
-
+def backup_options(selection, directory, database=BookDatabase):
     if selection == valid_options[0]:
         return database.save_backup(f"{enter_filename()}.db", directory)
     elif selection == valid_options[1]:
@@ -100,6 +94,7 @@ if __name__ == "__main__":
         2: "Search by AUTHOR's name",
         3: "Search by DATE the book was completed",
         4: "VIEW ALL entries",
+        5: "RETURN to Main Menu",
     }
     search_records_menu = Menu("Search Records", search_records_menu_options)
     remove_record_menu = Menu("Remove Record", search_records_menu_options)
@@ -107,6 +102,7 @@ if __name__ == "__main__":
     backup_menu_options = {
         1: "SAVE a backup of your collection",
         2: "LOAD a backup of your collection",
+        3: "RETURN to Main Menu",
     }
     backup_menu = Menu("Backup Options", backup_menu_options)
 
@@ -134,23 +130,30 @@ if __name__ == "__main__":
         # SEARCH RECORDS
         elif main_menu_selection == valid_main_menu_options[1]:
             print(search_records_menu.display())
-            search_results = search_records(book_database, search_records_menu)
+            valid_options = list(search_records_menu.get_options())
+            selection = search_records_menu.get_menu_selection()
+
+            if selection == valid_options[-1]:
+                continue_to_main_menu()
+                continue
+
+            search_results = search_records(selection, book_database)
 
             if "No results found" in search_results:
                 print(search_results)
                 continue_to_main_menu()
                 continue
 
-            viewport_selction = prompt_for_viewport()
+            viewport_selection = prompt_for_viewport()
 
             # VIEW RESULTS IN CONSOLE
-            if viewport_selction == "NO":
+            if viewport_selection == "NO":
                 view_in_console(search_results)
                 continue_to_main_menu()
                 continue
 
             # VIEW RESULTS IN BROWSER
-            if viewport_selction == "YES":
+            if viewport_selection == "YES":
                 search_results = book_database.generate_json_data()
                 json_string = json.dumps(search_results)
                 write_to_file(json_string, path_to_json_file)
@@ -200,7 +203,14 @@ if __name__ == "__main__":
         # DELETE A RECORD
         elif main_menu_selection == valid_main_menu_options[3]:
             print(remove_record_menu.display())
-            search_results = search_records(book_database, remove_record_menu)
+            valid_options = list(remove_record_menu.get_options())
+            selection = remove_record_menu.get_menu_selection()
+
+            if selection == valid_options[-1]:
+                continue_to_main_menu()
+                continue
+
+            search_results = search_records(selection, book_database)
 
             if "No results found" in search_results:
                 print(search_results)
@@ -215,7 +225,14 @@ if __name__ == "__main__":
         # BACKUP OPTIONS
         elif main_menu_selection == valid_main_menu_options[4]:
             print(backup_menu.display())
-            backup_options(data_directory, book_database, backup_menu)
+            valid_options = list(backup_menu.get_options())
+            selection = backup_menu.get_menu_selection()
+
+            if selection == valid_options[-1]:
+                continue_to_main_menu()
+                continue
+
+            backup_options(selection, data_directory, book_database)
             continue_to_main_menu()
             continue
 
