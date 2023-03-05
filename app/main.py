@@ -21,7 +21,7 @@ from utility import (
     write_to_file,
 )
 
-__version__ = "1.5.4"
+__version__ = "1.5.5"
 __author__ = "August Frisk <https://github.com/users/4N0NYM0U5MY7H>"
 
 
@@ -39,14 +39,14 @@ def search_records(database=BookDatabase, menu=Menu):
         return database.view_all_entries()
 
 
-def backup_options(direrctory, database=BookDatabase, menu=Menu):
+def backup_options(directory, database=BookDatabase, menu=Menu):
     valid_options = list(menu.get_options())
     selection = menu.get_menu_selection()
 
     if selection == valid_options[0]:
-        return database.save_backup(f"{direrctory}/{enter_filename()}.db")
+        return database.save_backup(f"{enter_filename()}.db", directory)
     elif selection == valid_options[1]:
-        return database.load_backup(f"{direrctory}/{enter_filename()}.db")
+        return database.load_backup(f"{enter_filename()}.db", directory)
 
 
 if __name__ == "__main__":

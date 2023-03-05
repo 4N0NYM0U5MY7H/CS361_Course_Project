@@ -2,7 +2,7 @@ import sys
 import re
 import time
 
-__version__ = "1.1.2"
+__version__ = "1.1.3"
 __author__ = "August Frisk <https://github.com/users/4N0NYM0U5MY7H>"
 
 # --------------------------------------------------------------------
@@ -33,7 +33,7 @@ def prompt_for_viewport():
 
 def view_in_console(search_results):
     print("Displaying records...")
-    print("Book ID | Title | Author Name | Date Completed")
+    print("BOOK ID | TITLE | AUTHOR NAME | DATE COMPLETED")
     print(search_results)
 
 
