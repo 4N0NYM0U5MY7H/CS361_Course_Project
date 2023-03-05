@@ -1,16 +1,11 @@
-import sys
 import re
 import time
 
-__version__ = "1.1.3"
+__version__ = "1.1.4"
 __author__ = "August Frisk <https://github.com/users/4N0NYM0U5MY7H>"
 
 # --------------------------------------------------------------------
 # Menu interface utility functions
-def exit_program():
-    return sys.exit()
-
-
 def continue_to_main_menu():
     input("Press ENTER to continue...")
     print("Returning to Main Menu...")

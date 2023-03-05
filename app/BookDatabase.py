@@ -1,9 +1,9 @@
-r"""BookDatabase class and interface support.
+r"""BookDatabase class and interface support functions.
 
 The BookDatabase module contains the BookDatabase class and support
 functions to interface with the BookDatabase class. Public interface
-functions are limited to user interface related operations on the
-database."""
+functions are limited to user interface related operations associated
+with the database."""
 
 import re
 import os
@@ -11,7 +11,7 @@ import sqlite3
 import shutil
 from contextlib import closing
 
-__version__ = "2.3.10"
+__version__ = "2.3.11"
 __author__ = "August Frisk <https://github.com/users/4N0NYM0U5MY7H>"
 
 # --------------------------------------------------------------------

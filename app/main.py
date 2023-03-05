@@ -12,7 +12,6 @@ from BookDatabase import (
     enter_filename,
 )
 from utility import (
-    exit_program,
     continue_to_main_menu,
     prompt_for_viewport,
     view_in_console,
@@ -21,7 +20,7 @@ from utility import (
     write_to_file,
 )
 
-__version__ = "1.5.5"
+__version__ = "1.7.2"
 __author__ = "August Frisk <https://github.com/users/4N0NYM0U5MY7H>"
 
 
@@ -241,8 +240,8 @@ if __name__ == "__main__":
             elif main_menu_selection == valid_main_menu_options[-1]:
                 print("Exiting program...")
                 write_to_file("exit", path_to_txt_file)
-                exit_program()
+                exit()
     except KeyboardInterrupt:
         print("Exiting program...")
         write_to_file("exit", path_to_txt_file)
-        exit_program()
+        exit()
