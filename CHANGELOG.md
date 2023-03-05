@@ -98,5 +98,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Project README.
 - .gitignore
 
+[2.1.0]: https://github.com/4N0NYM0U5MY7H/CS361_Individual_Project/releases/tag/v2.1.0
 [2.0.0]: https://github.com/4N0NYM0U5MY7H/CS361_Individual_Project/releases/tag/v2.0.0
 [1.0.0]: https://github.com/4N0NYM0U5MY7H/CS361_Individual_Project/releases/tag/v1.0.0
