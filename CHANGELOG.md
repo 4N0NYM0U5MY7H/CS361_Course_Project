@@ -10,8 +10,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Sort search results.
 - Update items in a database.
 - Merge duplicate items in a database.
+
+## [2.1.0] - 2023-03-13 (expected)
+
+### Added
+
 - Save a backup of the database.
 - Load a backup of the database.
+- Return to Main Menu options for all submenus.
+
+### Changed
+
+- UserInterface class is now Menu.
+- BookDatabase constructor now takes a filename as a parameter.
+
+### Fixed
+
+- Microservice to use variable names for files.
+- save_backup no longer crashes the program when trying to backup a file with the same name.
+- load_backup now only accepts a file that exists.
+- Code clean up.
+- Menu readability.
+
+### Removed
+
+- UserInterface.py
+- exit_program function from utility.py
 
 ## [2.0.0] - 2023-02-26
 
