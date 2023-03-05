@@ -1,16 +1,11 @@
-import sys
 import re
 import time
 
-
-__version__ = "1.1.0"
+__version__ = "1.1.4"
+__author__ = "August Frisk <https://github.com/users/4N0NYM0U5MY7H>"
 
 # --------------------------------------------------------------------
 # Menu interface utility functions
-def exit_program():
-    return sys.exit()
-
-
 def continue_to_main_menu():
     input("Press ENTER to continue...")
     print("Returning to Main Menu...")
@@ -18,14 +13,14 @@ def continue_to_main_menu():
 
 def prompt_for_viewport():
     print("View results in a web browser?")
-    print("Type 'yes' or 'no' and press ENTER to select an option.")
+    print("Type 'YES' or 'NO' and press ENTER to select an option.")
     while True:
         try:
             user_selection = input("Your input: ").upper()
-            if re.match("^([yY][eE][sS])|([nN][oO])$", user_selection) is None:
+            if re.match("^([Y][E][S])|([N][O])$", user_selection) is None:
                 raise ValueError
         except ValueError:
-            print("Only 'yes' or 'no' are accepted")
+            print("Only 'YES' or 'NO' are accepted")
             continue
         else:
             return user_selection
@@ -33,7 +28,7 @@ def prompt_for_viewport():
 
 def view_in_console(search_results):
     print("Displaying records...")
-    print("Book ID | Title | Author Name | Date Completed")
+    print("BOOK ID | TITLE | AUTHOR NAME | DATE COMPLETED")
     print(search_results)
 
 

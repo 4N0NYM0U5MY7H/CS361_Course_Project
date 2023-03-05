@@ -1,14 +1,11 @@
-# Author: August Frisk
-# GitHub username: @4N0NYM0U5MY7H
-# Date: 2023, February 18
-
 import re
 
-__version__ = "2.1.2"
+__version__ = "3.0.1"
+__author__ = "August Frisk <https://github.com/users/4N0NYM0U5MY7H>"
 
 
-class UserInterface:
-    """User interface class representing menus and options for the CS361 book tracking program."""
+class Menu:
+    """Menu class representing options for a command line interface program."""
 
     def __init__(self, title, options=None):
         super().__init__()

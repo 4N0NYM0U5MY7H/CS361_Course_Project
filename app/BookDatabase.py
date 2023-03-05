@@ -1,26 +1,29 @@
-# Author: August Frisk
-# GitHub username: @4N0NYM0U5MY7H
-# Date: 2023, February 18
+r"""BookDatabase class and interface support functions.
+
+The BookDatabase module contains the BookDatabase class and support
+functions to interface with the BookDatabase class. Public interface
+functions are limited to user interface related operations associated
+with the database."""
 
 import re
+import os
 import sqlite3
+import shutil
 from contextlib import closing
 
-r"""The BookDatabase module contains the BookDatabase class and interface functions
-for the CS361 book tracking program."""
-
-__version__ = "2.1.0"
+__version__ = "2.3.11"
+__author__ = "August Frisk <https://github.com/users/4N0NYM0U5MY7H>"
 
 # --------------------------------------------------------------------
 # Public database interface functions
 def enter_book_title():
     while True:
         print(
-            "Enter a Book Title.\n"
+            "Enter a BOOK TITLE.\n"
             + "Must only use A(a)-Z(z). Can include spaces.\n"
             + "Must be less than 200 characters."
         )
-        book_title = input("Book Title: ").title()
+        book_title = input("BOOK TITLE: ").title()
         if re.search("^[a-zA-Z\s]+$", book_title):
             if len(book_title) < 201:
                 return book_title
@@ -29,11 +32,11 @@ def enter_book_title():
 def enter_author_name():
     while True:
         print(
-            "Enter an Author's name.\n"
+            "Enter an AUTHOR's NAME.\n"
             + "Must only use A(a)-Z(z). Can include spaces.\n"
             + "Must be less than 100 characters."
         )
-        author_name = input("Author Name: ").title()
+        author_name = input("AUTHOR NAME: ").title()
         if re.search("^[a-zA-Z\s]+$", author_name):
             if len(author_name) < 100:
                 return author_name
@@ -42,26 +45,39 @@ def enter_author_name():
 def enter_date_completed():
     while True:
         print(
-            "Enter a date the book was completed.\n"
-            + "Must be in the following format: MM/DD/YYYY."
+            "Enter a DATE the book was completed.\n"
+            + "Must use this format: MM/DD/YYYY."
         )
-        date_completed = input("Date Completed: ")
+        date_completed = input("DATE COMPLETED: ")
         if re.match("(\d{2})[/](\d{2})[/](\d{4})$", date_completed):
             return date_completed
 
 
 def enter_book_id():
-    print("Enter a Book ID to delete.")
+    print("Enter a BOOK ID to delete.")
     print("Input a number and press ENTER to select an option.")
     while True:
         try:
-            user_input = int(input("Your input: "))
+            user_input = int(input("BOOK ID: "))
             if re.search("[0-9]+", str(user_input)) is None:
                 raise ValueError
         except ValueError:
             continue
         else:
             return user_input
+
+
+def enter_filename():
+    while True:
+        print(
+            "Enter a FILE NAME.\n"
+            + "Must only use A(a)-Z(z).\n"
+            + "Must be less than 25 characters."
+        )
+        filename = input("FILE NAME: ")
+        if re.search("^[a-zA-Z]+$", filename):
+            if len(filename) < 26:
+                return filename
 
 
 # --------------------------------------------------------------------
@@ -94,8 +110,8 @@ class BookDatabase:
             return cls.instance
         return cls.instance
 
-    def __init__(self):
-        self._sqlite_file = "data/books.db"
+    def __init__(self, filename):
+        self._sqlite_file = filename
         _create_database(self._sqlite_file)
         self._connection = self._create_connection()
         self._create_table()
@@ -150,6 +166,23 @@ class BookDatabase:
                 return key
         raise IndexError("dictionary index out of range.")
 
+    def _set_sqlite_file(self, filename):
+        self._sqlite_file = filename
+
+    def save_backup(self, filename, directory):
+        try:
+            shutil.copy2(self._sqlite_file, f"{directory}/{filename}")
+            print(f"Successfully saved {filename} to {directory}!")
+        except shutil.SameFileError as error:
+            print(f"save_backup: {error}")
+
+    def load_backup(self, filename, directory):
+        if filename in os.listdir(directory):
+            self._set_sqlite_file(filename)
+            print(f"Successfully loaded backup {filename} from {directory}")
+        else:
+            print(f"No file named {filename} in {directory}/!")
+
     def add_new_entry(self, args):
         sql_string = self._queries["add new"]
         try:
@@ -175,20 +208,20 @@ class BookDatabase:
                         print("Are you sure you want to delete this from your records?")
                         print(query_string)
                         while True:
-                            print("Type 'yes' to continue or press ENTER to cancel.")
+                            print("Type 'YES' to continue or press ENTER to cancel.")
                             continue_prompt = input("Your input: ")
-                            if continue_prompt.lower() == "yes":
+                            if continue_prompt.upper() == "YES":
                                 cursor.execute(sql_delete_string, args)
                                 print("Book successfully deleted!")
                                 connection.commit()
                                 return
                             else:
-                                print("Canceling delete request.")
+                                print("Canceling delete request...")
                                 return
                     else:
                         print(f"No records found with Book ID {id}.")
         except sqlite3.Error as error:
-            print(f"delete_entry_by_id: {error}")
+            print(f"delete_by_id: {error}")
 
     def view_all_entries(self):
         sql_string = """SELECT * FROM books ORDER BY title DESC"""
@@ -212,12 +245,11 @@ class BookDatabase:
             with closing(self._create_connection()) as connection:
                 with closing(connection.cursor()) as cursor:
                     query = cursor.execute(sql_string, args).fetchall()
-                    if query:
-                        return _return_query_by_row(query)
-                    else:
-                        return (
-                            f"No results found with {self._get_query_key(key)} {value}"
-                        )
+                    return (
+                        _return_query_by_row(query)
+                        if query
+                        else f"No results found with {self._get_query_key(key)} {value}"
+                    )
         except sqlite3.Error as error:
             print(f"search: {error}")
 
