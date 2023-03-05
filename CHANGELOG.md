@@ -10,8 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Sort search results.
 - Update items in a database.
 - Merge duplicate items in a database.
+- Search by partial title.
+- Search by partial author name.
+- Search by partial date.
 
-## [2.1.0] - 2023-03-13 (expected)
+## [2.1.0] - 2023-03-05
 
 ### Added
 
