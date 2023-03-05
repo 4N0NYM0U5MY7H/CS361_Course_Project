@@ -111,133 +111,138 @@ if __name__ == "__main__":
 
     valid_main_menu_options = list(main_menu.get_options())
 
-    while True:
-        print(main_menu.display())
-        main_menu_selection = main_menu.get_menu_selection()
+    try:
+        while True:
+            print(main_menu.display())
+            main_menu_selection = main_menu.get_menu_selection()
 
-        # ADD NEW RECORD
-        if main_menu_selection == valid_main_menu_options[0]:
-            print(add_record_menu.display())
-            book_data = (
-                enter_book_title(),
-                enter_author_name(),
-                enter_date_completed(),
-            )
-            book_database.add_new_entry(book_data)
-            continue_to_main_menu()
-            continue
-
-        # SEARCH RECORDS
-        elif main_menu_selection == valid_main_menu_options[1]:
-            print(search_records_menu.display())
-            valid_options = list(search_records_menu.get_options())
-            selection = search_records_menu.get_menu_selection()
-
-            if selection == valid_options[-1]:
+            # ADD NEW RECORD
+            if main_menu_selection == valid_main_menu_options[0]:
+                print(add_record_menu.display())
+                book_data = (
+                    enter_book_title(),
+                    enter_author_name(),
+                    enter_date_completed(),
+                )
+                book_database.add_new_entry(book_data)
                 continue_to_main_menu()
                 continue
 
-            search_results = search_records(selection, book_database)
+            # SEARCH RECORDS
+            elif main_menu_selection == valid_main_menu_options[1]:
+                print(search_records_menu.display())
+                valid_options = list(search_records_menu.get_options())
+                selection = search_records_menu.get_menu_selection()
 
-            if "No results found" in search_results:
-                print(search_results)
-                continue_to_main_menu()
-                continue
+                if selection == valid_options[-1]:
+                    continue_to_main_menu()
+                    continue
 
-            viewport_selection = prompt_for_viewport()
+                search_results = search_records(selection, book_database)
 
-            # VIEW RESULTS IN CONSOLE
-            if viewport_selection == "NO":
+                if "No results found" in search_results:
+                    print(search_results)
+                    continue_to_main_menu()
+                    continue
+
+                viewport_selection = prompt_for_viewport()
+
+                # VIEW RESULTS IN CONSOLE
+                if viewport_selection == "NO":
+                    view_in_console(search_results)
+                    continue_to_main_menu()
+                    continue
+
+                # VIEW RESULTS IN BROWSER
+                if viewport_selection == "YES":
+                    search_results = book_database.generate_json_data()
+                    json_string = json.dumps(search_results)
+                    write_to_file(json_string, path_to_json_file)
+                    write_to_file("request", path_to_txt_file)
+
+                    try:
+                        wait_for_microservice_response(path_to_html_file)
+                    except MicroserviceException as error:
+                        print(error)
+                        continue_to_main_menu()
+                        continue
+                    else:
+                        webbrowser.open("file://" + os.path.realpath(path_to_html_file))
+                        continue_to_main_menu()
+                        continue
+
+            # VIEW ALL RECORDS
+            elif main_menu_selection == valid_main_menu_options[2]:
+
+                viewport_selection = prompt_for_viewport()
+
+                # VIEW RESULTS IN CONSOLE
+                if viewport_selection == "NO":
+                    view_in_console(book_database.view_all_entries())
+                    continue_to_main_menu()
+                    continue
+
+                # VIEW RESULTS IN BROWSER
+                if viewport_selection == "YES":
+                    book_database.view_all_entries()
+                    search_results = book_database.generate_json_data()
+                    json_string = json.dumps(search_results)
+                    write_to_file(json_string, path_to_json_file)
+                    write_to_file("request", path_to_txt_file)
+
+                    try:
+                        wait_for_microservice_response(path_to_html_file)
+                    except MicroserviceException as error:
+                        print(error)
+                        continue_to_main_menu()
+                        continue
+                    else:
+                        webbrowser.open("file://" + os.path.realpath(path_to_html_file))
+                        continue_to_main_menu()
+                        continue
+
+            # DELETE A RECORD
+            elif main_menu_selection == valid_main_menu_options[3]:
+                print(remove_record_menu.display())
+                valid_options = list(remove_record_menu.get_options())
+                selection = remove_record_menu.get_menu_selection()
+
+                if selection == valid_options[-1]:
+                    continue_to_main_menu()
+                    continue
+
+                search_results = search_records(selection, book_database)
+
+                if "No results found" in search_results:
+                    print(search_results)
+                    continue_to_main_menu()
+                    continue
+
                 view_in_console(search_results)
+                book_database.delete_by_id(enter_book_id())
                 continue_to_main_menu()
                 continue
 
-            # VIEW RESULTS IN BROWSER
-            if viewport_selection == "YES":
-                search_results = book_database.generate_json_data()
-                json_string = json.dumps(search_results)
-                write_to_file(json_string, path_to_json_file)
-                write_to_file("request", path_to_txt_file)
+            # BACKUP OPTIONS
+            elif main_menu_selection == valid_main_menu_options[4]:
+                print(backup_menu.display())
+                valid_options = list(backup_menu.get_options())
+                selection = backup_menu.get_menu_selection()
 
-                try:
-                    wait_for_microservice_response(path_to_html_file)
-                except MicroserviceException as error:
-                    print(error)
-                    continue_to_main_menu()
-                    continue
-                else:
-                    webbrowser.open("file://" + os.path.realpath(path_to_html_file))
+                if selection == valid_options[-1]:
                     continue_to_main_menu()
                     continue
 
-        # VIEW ALL RECORDS
-        elif main_menu_selection == valid_main_menu_options[2]:
-
-            viewport_selection = prompt_for_viewport()
-
-            # VIEW RESULTS IN CONSOLE
-            if viewport_selection == "NO":
-                view_in_console(book_database.view_all_entries())
+                backup_options(selection, data_directory, book_database)
                 continue_to_main_menu()
                 continue
 
-            # VIEW RESULTS IN BROWSER
-            if viewport_selection == "YES":
-                book_database.view_all_entries()
-                search_results = book_database.generate_json_data()
-                json_string = json.dumps(search_results)
-                write_to_file(json_string, path_to_json_file)
-                write_to_file("request", path_to_txt_file)
-
-                try:
-                    wait_for_microservice_response(path_to_html_file)
-                except MicroserviceException as error:
-                    print(error)
-                    continue_to_main_menu()
-                    continue
-                else:
-                    webbrowser.open("file://" + os.path.realpath(path_to_html_file))
-                    continue_to_main_menu()
-                    continue
-
-        # DELETE A RECORD
-        elif main_menu_selection == valid_main_menu_options[3]:
-            print(remove_record_menu.display())
-            valid_options = list(remove_record_menu.get_options())
-            selection = remove_record_menu.get_menu_selection()
-
-            if selection == valid_options[-1]:
-                continue_to_main_menu()
-                continue
-
-            search_results = search_records(selection, book_database)
-
-            if "No results found" in search_results:
-                print(search_results)
-                continue_to_main_menu()
-                continue
-
-            view_in_console(search_results)
-            book_database.delete_by_id(enter_book_id())
-            continue_to_main_menu()
-            continue
-
-        # BACKUP OPTIONS
-        elif main_menu_selection == valid_main_menu_options[4]:
-            print(backup_menu.display())
-            valid_options = list(backup_menu.get_options())
-            selection = backup_menu.get_menu_selection()
-
-            if selection == valid_options[-1]:
-                continue_to_main_menu()
-                continue
-
-            backup_options(selection, data_directory, book_database)
-            continue_to_main_menu()
-            continue
-
-        # EXIT PROGRAM
-        elif main_menu_selection == valid_main_menu_options[-1]:
-            print("Exiting program...")
-            write_to_file("exit", path_to_txt_file)
-            exit_program()
+            # EXIT PROGRAM
+            elif main_menu_selection == valid_main_menu_options[-1]:
+                print("Exiting program...")
+                write_to_file("exit", path_to_txt_file)
+                exit_program()
+    except KeyboardInterrupt:
+        print("Exiting program...")
+        write_to_file("exit", path_to_txt_file)
+        exit_program()
