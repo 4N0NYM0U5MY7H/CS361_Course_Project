@@ -178,7 +178,7 @@ class BookDatabase:
 
     def load_backup(self, filename, directory):
         if filename in os.listdir(directory):
-            self._set_sqlite_file(filename)
+            self._set_sqlite_file(f"{dirctory}/{filename}")
             print(f"Successfully loaded backup {filename} from {directory}")
         else:
             print(f"No file named {filename} in {directory}/!")
