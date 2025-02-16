@@ -18,18 +18,6 @@ Because you've already forgotten what you've read!
 ![Last Updated](https://img.shields.io/badge/March_2023-critical?label=Last%20Updated&style=flat-square)
 ![Not Maintained](https://img.shields.io/badge/Not_Maintained-critical?label=Status&style=flat-square)
 
-## Table of Contents
-- [CS361: Course Project — Reading Tracker](#cs361-course-project--reading-tracker)
-  - [Table of Contents](#table-of-contents)
-  - [About](#about)
-  - [Getting Started](#getting-started)
-    - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
-    - [Build and run the program](#build-and-run-the-program)
-  - [TODO](#todo)
-  - [Built With](#built-with)
-  - [License](#license)
-
 ## About
 This full-term project uses a microservices architecture to track reading completed by the user.  The project is developed using agile methodologies.  The user interface adheres to the 8 Cognitive Style Hueristics (CSH).  Data persistence is provided using Python's built-in SQLite3 library.  Microservices for this project are provided by @[jay2002shah](https://github.com/jay2002shah/).
 
